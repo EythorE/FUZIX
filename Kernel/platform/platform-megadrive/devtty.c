@@ -63,6 +63,13 @@ void tty_setup(uint_fast8_t minor, uint_fast8_t flags)
 {
 }
 
+extern char readKey();  // Keep existing external assembly routine
+static void poll_keyboard(void)
+{
+    char k = readKey();
+    if (k)  // If a key was pressed
+        tty_inproc(1, k);  // Send to TTY subsystem on console 1
+}
 
 // void tty_poll(uint8_t minor, struct uart16x50 volatile *u)
 // {	
@@ -70,14 +77,30 @@ void tty_setup(uint_fast8_t minor, uint_fast8_t flags)
 
 void tty_interrupt(void)
 {
+    kprintf("tty_interrupt\n");
+    // plt_interrupt();
 	// tty_poll(1, uart);
 }
 
-void plt_interrupt(void)
-{
-	// tty_interrupt();
-}
+// void plt_interrupt(void)
+// {
+// 	// tty_interrupt();
+// }
 
 void tty_data_consumed(uint_fast8_t minor)
 {
+}
+
+extern char readKey();  // Keep existing external assembly routine
+void plt_interrupt(void)
+{
+    static uint8_t ticker = 0;
+    
+    poll_keyboard();
+    
+    /* Use power of 2 mask (0x07 = 7) for efficient modulo */
+    ticker = (ticker + 1) & 0x07;  /* Same as % 8 but faster */
+    if ((ticker & 0x03) == 0) {    /* Every 4th tick */
+        timer_interrupt();
+    }
 }

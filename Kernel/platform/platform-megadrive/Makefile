@@ -1,7 +1,10 @@
 CSRCS = devtty.c devices.c libc.c main.c
 COBJS = $(CSRCS:.c=$(BINEXT))
 
-ASRCS = $(wildcard bios/*.S) crt0.S tricks.S megadrive.S
+BSRC = $(wildcard bios/*.S)
+BOBJS = $(patsubst bios/%.S,%.o, $(BSRC))
+
+ASRCS = crt0.S tricks.S megadrive.S
 AOBJS = $(ASRCS:.S=.o)
 
 # DSRCS = ../../dev/devrd.c
@@ -10,14 +13,20 @@ AOBJS = $(ASRCS:.S=.o)
 LSRCS = ../../lib/68000exception.c ../../lib/68000usercopy.c ../../lib/68000relocate.c
 LOBJS = $(patsubst ../../lib/%.c,%.o, $(LSRCS))
 
-OBJS  = $(COBJS) $(AOBJS) $(DOBJS) $(LOBJS)
+OBJS  = $(COBJS) $(AOBJS) $(BOBJS) $(DOBJS) $(LOBJS)
 
 CROSS_CCOPTS += -I../../dev/
 
 all:	$(OBJS)
 
 $(AOBJS): %.o: %.S
+	$(CROSS_AS) $(ASOPTS) $<
+
+$(BOBJS): %.o: bios/%.S
 	$(CROSS_AS) $(ASOPTS) $< -o $@
+	
+$(DOBJS): %.o: ../../dev/%.c
+	$(CROSS_CC) $(CROSS_CCOPTS) -c $< -o $@
 
 $(COBJS): %.o: %.c
 	$(CROSS_CC) $(CROSS_CCOPTS) -c $<
@@ -34,8 +43,8 @@ clean:
 	rm -f bios/*.o *.o fuzix.elf loader.elf loader.map loader.bin core *~ 
 	rm -f fuzix.rom
 
-image: fuzix.ld $(AOBJS) main.o devtty.o
-	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(AOBJS) main.o devtty.o \
+image: fuzix.ld $(AOBJS) $(BOBJS)  main.o devtty.o kernel.def
+	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(AOBJS) $(BOBJS) main.o devtty.o \
 	../../start.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
 	../../timer.o ../../kdata.o 68000exception.o devices.o \
 	../../devio.o ../../filesys.o ../../process.o ../../inode.o ../../syscall_fs.o \

@@ -3,7 +3,6 @@
 #include <timer.h>
 #include <kdata.h>
 #include <printf.h>
-#include <blkdev.h>
 
 extern char readKey();  // External assembly routine
 extern void printString(char *str);  // External assembly routine
@@ -49,18 +48,22 @@ void memzero(void *p, usize_t len)
 
 void pagemap_init(void)
 {
-	uint8_t r;
+	// uint8_t r;
 	/* Linker provided end of kernel */
 	/* TODO: create a discard area at the end of the image and start
 	   there */
 	extern uint8_t _end;
-	uint32_t e = (uint32_t)&_end;
-	/* Allocate the rest of memory to the userspace */
-	kmemaddblk((void *)e, 0xD00000 - e);
 
 	kprintf("Motorola 680%s%d processor detected.\n",
 		sysinfo.cpu[1]?"":"0",sysinfo.cpu[1]);
-	enable_icache();
+
+    uint32_t e = (uint32_t)&_end;
+    uint32_t ram_end = 0xFFFFFF;
+    
+    /* Add available RAM block */
+    kmemaddblk((void *)e, ram_end - e);
+    
+    kprintf("RAM: %dKB (%x-%x)\n", (ram_end - e)/1024, e, ram_end);
 
 }
 
@@ -83,3 +86,4 @@ uint8_t plt_udata_set(ptptr p)
 	p->p_udata = &udata_block[p - ptab].u_d;
 	return 0;
 }
+
