@@ -1,0 +1,22 @@
+/* Hardware version address */
+#define HARDWARE_VER_ADDRESS      0xA10001
+
+/* TMSS */
+#define TMSS_ADDRESS             0xA14000
+
+/* I/O Control and Data Ports */
+#define IO_CTRL1                 0xA10009    /* I/O control port 1P */
+#define IO_CTRL2                 0xA1000B    /* I/O control port 2P */ 
+#define IO_CTRL_EXT              0xA1000D    /* I/O control port modem */
+#define IO_DATA1                 0xA10003    /* I/O data port 1P */
+#define IO_DATA2                 0xA10005    /* I/O data port 2P */
+#define IO_DATA_EXT              0xA10007    /* I/O data port modem */
+
+/* VDP Port Addresses */
+#define VDP_DATA                 0xC00000    /* VDP data port, R/W */
+#define VDP_CONTROL              0xC00004    /* VDP control port, writes only */
+
+/* Z80 Addresses */ 
+#define Z80_RAM                  0xA00000    /* Where Z80 RAM starts */
+#define Z80_BUS_REQ              0xA11100    /* Z80 bus request line */
+#define Z80_RESET                0xA11200    /* Z80 reset line */

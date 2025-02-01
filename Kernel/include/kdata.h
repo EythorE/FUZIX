@@ -2,6 +2,7 @@
 #define __KDATA_DOT_H__
 
 #include <stdbool.h>
+#include "config.h"
 
 extern char *cmdline;
 

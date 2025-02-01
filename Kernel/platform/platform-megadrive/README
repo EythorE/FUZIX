@@ -1,0 +1,23 @@
+68K Nano
+
+A ROM based build for the 68K nano system. We build in ROM because it was
+easier than rewriting the monitor. The vectors are in ROM space and we'd need
+to rewrite the monitor to revector them anyway to make things work.
+
+It would work RAM based with some small adjustments and with revectoring
+and a more clean boot ROM could then probably boot CP/M-68K, EHBASIC or
+FUZIX as desired.
+
+Memory Map:
+
+000000-0FFFFF	64K ROM repeating
+900000-9XXXXF	CF adapter (16bit wide but the designer didn't swap the
+		upper and lower bytes in hardware)
+A00000-AXXXXF	UART (16x50)
+C00000-CFFFFF	RAM
+
+All other addresses are unusable or empty (8xxxxxxx is empty)
+
+The 16x50 is also used as the interrupt controller and as GPIO lines which
+run an SPI interface to an RTC. It interrupts on autovector 1
+
