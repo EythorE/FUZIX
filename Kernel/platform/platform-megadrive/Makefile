@@ -1,10 +1,10 @@
-CSRCS = devtty.c devices.c libc.c main.c
+CSRCS = devtty.c devices.c libc.c main.c devrd.c
 COBJS = $(CSRCS:.c=$(BINEXT))
 
 BSRC = $(wildcard bios/*.S)
 BOBJS = $(patsubst bios/%.S,%.o, $(BSRC))
 
-ASRCS = crt0.S tricks.S megadrive.S
+ASRCS = crt0.S tricks.S megadrive.S devrd_rdcpy.S
 AOBJS = $(ASRCS:.S=.o)
 
 # DSRCS = ../../dev/devrd.c
@@ -44,7 +44,7 @@ clean:
 	rm -f fuzix.rom
 
 image: fuzix.ld $(AOBJS) $(BOBJS)  main.o devtty.o kernel.def
-	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(AOBJS) $(BOBJS) main.o devtty.o \
+	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(AOBJS) $(BOBJS) devrd.o main.o devtty.o \
 	../../start.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
 	../../timer.o ../../kdata.o 68000exception.o devices.o \
 	../../devio.o ../../filesys.o ../../process.o ../../inode.o ../../syscall_fs.o \
@@ -55,15 +55,23 @@ image: fuzix.ld $(AOBJS) $(BOBJS)  main.o devtty.o kernel.def
 	68000relocate.o \
 	../../level2.o ../../syscall_level2.o ../../select.o > ../../fuzix.map
 	$(CROSS_COMPILE)objcopy fuzix.elf -O binary ../../fuzix.bin
-	dd if=../../fuzix.bin of=fuzix.rom bs=65536 conv=sync
+# dd if=../../fuzix.bin of=fuzix.rom bs=65536 conv=sync
 
 IMAGES = $(FUZIX_ROOT)/Images/$(TARGET)
 
-diskimage:
-	# Make a blank disk image with partition
-	dd if=$(FUZIX_ROOT)/Standalone/filesystem-src/parttab.40M of=$(IMAGES)/disk.img bs=40017920 conv=sync
-	# Add the file system
-	dd if=$(IMAGES)/filesys.img of=$(IMAGES)/disk.img bs=512 seek=2048 conv=notrunc
-	# Make an emulator image of it
-	cat $(FUZIX_ROOT)/Standalone/filesystem-src/idehdr.40M $(IMAGES)/disk.img > $(IMAGES)/emu-ide.img
-	cp fuzix.rom $(IMAGES)
+# diskimage:
+# 	# Make a blank disk image with partition
+# 	dd if=$(FUZIX_ROOT)/Standalone/filesystem-src/parttab.40M of=$(IMAGES)/disk.img bs=40017920 conv=sync
+# 	# Add the file system
+# 	dd if=$(IMAGES)/filesys.img of=$(IMAGES)/disk.img bs=512 seek=2048 conv=notrunc
+# 	# Make an emulator image of it
+# 	cat $(FUZIX_ROOT)/Standalone/filesystem-src/idehdr.40M $(IMAGES)/disk.img > $(IMAGES)/emu-ide.img
+# 	cp fuzix.rom $(IMAGES)
+
+# 4096*512b blocks = 2MB
+# 
+diskimage: image
+	(cd $(FUZIX_ROOT)/Standalone/filesystem-src; ./build-mini-filesystem -X $(IMAGES)/filesys.img 64 4096)
+	dd if=../../fuzix.bin of=$(IMAGES)/fuzix.rom bs=2M conv=notrunc
+	dd if=$(IMAGES)/filesys.img of=$(IMAGES)/fuzix.rom bs=2M seek=1 conv=notrunc
+

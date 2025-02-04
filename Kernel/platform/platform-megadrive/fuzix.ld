@@ -4,7 +4,8 @@ SEARCH_DIR(.)
 
 MEMORY
 {
-    rom (rx) : ORIGIN = 0x000000, LENGTH = 0x3FFFFF  /* 4MB Cartridge ROM/RAM */
+    rom (rx) : ORIGIN = 0x000000, LENGTH = 0x200000  /* 4MB Cartridge ROM/RAM */
+    rom_disk : ORIGIN = 0x200000, LENGTH = 0x200000
     ram (rw) : ORIGIN = 0xFF0000, LENGTH = 0x010000  /* 64KB RAM */
 }
 

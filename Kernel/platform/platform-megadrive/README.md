@@ -1,13 +1,16 @@
 # Interrupts
 Fuzix uses the mask defined in kernel.def to enable or disable interupts.  
 Normally on the mega drive we use:
+sr:
+T | 0 | S | 0 | 0 | IPM2 | IPM1| IPM0 | 0 | 0 | 0 | X | N | Z | V | C
+
 ```
 move    #$2700,sr    ; Disable interrupts.
 move    #$2300,sr    ; Enable interrupts.
 ```
 However, for Fuzix we are using
 ```
-0x2000 = Supervisor mode, all interrupts
+0x2700 = Supervisor mode, all interrupts
 0x0000 = User mode, all interrupts
 ```
 

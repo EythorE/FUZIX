@@ -172,8 +172,8 @@ arg_t _execve(void)
 	udata.u_ptab->p_top = top;
 
 #ifdef DEBUG
-	kprintf("user space at %p\n", progbase);
-	kprintf("top at %p\n", progbase + bin_size);
+	// kprintf("user space at %p\n", progbase);
+	// kprintf("top at %p\n", progbase + bin_size);
 #endif
 
 	go = (uint32_t)udata.u_codebase + aout.a_entry;

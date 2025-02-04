@@ -3,24 +3,40 @@
  */
 
 // /* ROM ramdisk definitions */
-// extern char __rom_header_end[];
+#define BLKSHIFT 9             /* 512 byte blocks */
+#define DEV_RD_ROM_PAGES 4096     /* size of the ROM disk (/dev/rd0) in 512B pages */
+// #define DEV_RD_RAM_PAGES 8      /* size of the RAM disk (/dev/rd1) in 512B pages */
 
-// /* ROM ramdisk definitions */
-// #define DEV_RD_ROM_START   ((unsigned long)&__rom_header_end)
-// #define DEV_RD_ROM_SIZE    0x4000  /* Size of ROM ramdisk (16KB example) */
+#define DEV_RD_ROM_START ((uint32_t)0x200000)
+// #define DEV_RD_RAM_START ((uint32_t)(256-DEV_RD_RAM_PAGES) << BLKSHIFT)
+#define DEV_RD_ROM_SIZE  ((uint32_t)DEV_RD_ROM_PAGES << BLKSHIFT)
+// #define DEV_RD_RAM_SIZE  ((uint32_t)DEV_RD_RAM_PAGES << BLKSHIFT)
 
-// /* RAM ramdisk definitions */
-// #define DEV_RD_RAM_START   0x4000  /* Starting address of RAM ramdisk */
-// #define DEV_RD_RAM_SIZE    0x4000  /* Size of RAM ramdisk (16KB example) */
+
+#define DEBUG
+#define DEBUG_MEMORY
+
+
+// #define TICKSPERSEC 300   /* Ticks per second */
+// #define PROGBASE    0x0000  /* also data base */
+// #define PROGLOAD    0x0100  /* also data base */
+// #define PROGTOP     0xC000  /* Top of program, below C000 for simplicity
+//                                to get going */
+
 
 /* Basic TTY defines needed by kernel */
 #define NUM_DEV_TTY 1      /* Minimum needed */
 #define TTYDEV   513      /* Default TTY device */
 
 /* Basic device defines needed by kernel */
-#define NBUFS    1        /* Number of buffers */
+#define NBUFS    4        /* Number of buffers */
 #define NMOUNTS  1        /* Number of mounts */
 #define BOOT_TTY 513        /* Set this to default device for stdio, stderr */
+
+#define CONFIG_SPLIT_UDATA	/* Adjacent addresses but different bank! */
+#define UDATA_BLKS  1		/* One block of udata */
+#define UDATA_SIZE  512		/* 512 bytes of udata */
+#define MAX_SWAPS   2	    	/* We will size if from the partition */
 
 // /* Support a 40 column console for now */
 // #define CONFIG_VT
@@ -53,9 +69,6 @@
 #define CONFIG_32BIT
 #define CONFIG_LEVEL_2
 
-/* Simple memory layout */
-#define UDATA_SIZE  1024
-#define UDATA_BLKS  2
 
 
 

@@ -5,8 +5,8 @@
 #include <devsys.h>
 #include <tty.h>
 #include <devtty.h>
-#include <devrd.h>
 #include <vt.h>
+#include "devrd.h"
 // #include <devrd.h>
 
 struct devsw dev_tab[] =  /* The device driver switch table */
@@ -14,9 +14,9 @@ struct devsw dev_tab[] =  /* The device driver switch table */
 // minor    open         close        read      write       ioctl
 // -----------------------------------------------------------------
   /* 0: /dev/hd		Disc block devices  */
-  // {  rd_open,     no_close,    rd_read,   rd_write,  no_ioctl },
-  {  no_open,     no_close,   no_rdwr,   no_rdwr,  no_ioctl  },
-  /* 1: /dev/hd		Hard disc block devices (absent) */
+  {  rd_open,     no_close,    rd_read,   rd_write,   no_ioctl },
+  // {  no_open,     no_close,   no_rdwr,   no_rdwr,  no_ioctl  },
+  /* 1: /dev/fd		Hard disc block devices (absent) */
   {  nxio_open,     no_close,    no_rdwr,   no_rdwr,   no_ioctl },
   /* 2: /dev/tty	TTY devices */
   {  tty_open,     tty_close,   tty_read,  tty_write,  tty_ioctl },

@@ -58,12 +58,12 @@ void pagemap_init(void)
 		sysinfo.cpu[1]?"":"0",sysinfo.cpu[1]);
 
     uint32_t e = (uint32_t)&_end;
+
     uint32_t ram_end = 0xFFFFFF;
-    
     /* Add available RAM block */
     kmemaddblk((void *)e, ram_end - e);
     
-    kprintf("RAM: %dKB (%x-%x)\n", (ram_end - e)/1024, e, ram_end);
+    kprintf("RAM: %dKB (%lx-%lx)\n", (ram_end - e)/1024, e, ram_end);
 
 }
 

@@ -1,5 +1,5 @@
-#define DI_MASK	 $700  /*  Disable interrupts. or bits for DI */
-#define EI_MASK	 $000  /*  Enable interrupts.  or bits for EI */
+#define DI_MASK	 $300  /* $700 Disable interrupts. or bits for DI */
+#define EI_MASK	 $300  /* $000 Enable interrupts.  or bits for EI */
 
 /* We have our own handlers because we are ROM based */
 #define CONFIG_PLT_VECTORS
