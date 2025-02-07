@@ -15,7 +15,7 @@ extern void printString(char *str);  // External assembly routine
 //     }
 // }
 
-uint16_t swap_dev = 0xFFFF;
+// uint16_t swap_dev = 0xFFFF;
 
 void do_beep(void)
 {
@@ -67,6 +67,7 @@ void pagemap_init(void)
 
 }
 
+// see mm/flat.c
 /* Udata and kernel stacks */
 /* We need an initial kernel stack and udata so the slot for init is
    set up at compile time */

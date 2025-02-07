@@ -103,7 +103,6 @@
 # If your emulator doesn't show the correct ROM name, then this
 # table is in the wrong place or in the wrong format.
 #==============================================================
-.set rom_end_address, _ROM_End - 1
 	.ascii "SEGA MEGA DRIVE "    | Console name
 	.ascii "eythore         "    | Copyright holder and release date
 	.ascii "WozMon          "	 | 0x120 48 bytes | Game title (domestic)
@@ -115,8 +114,8 @@
 	.ascii "GM XXXXXXXX-XX"      | Version number
 	.word 0x0000                 | Checksum
 	.ascii "J               "    | I/O support
-	.long _ROM_Start             | Start address of ROM
-	.long rom_end_address        | End address of ROM
+	.long 0x00000000            | Start address of ROM
+	.long 0x00400000            | End address of ROM
 	.long 0x00FF0000             | Start address of RAM
 	.long 0x00FFFFFF             | End address of RAM
 	.long 0x00000000             | SRAM enabled

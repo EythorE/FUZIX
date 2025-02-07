@@ -20,24 +20,17 @@ plt_reboot:
 	    jmp start
 
 init_early:
-	    lea.l udata_block,a5	; udata ptr
-	    move.l a5,udata_shadow	; shadow copy for entry/exit
+	   lea.l udata_block,a5	; udata ptr
+	   move.l a5,udata_shadow	; shadow copy for entry/exit
             rts
 
 plt_idle:
 	    stop #($2000+EI_MASK)
 	    rts
 init_hardware:
-	    move.w #1024,d0
-	    move.w d0,ramsize
-	    move.l #_end+512,d1
-	    sub.l #_data,d1
-	    lsr.l #8,d1
-	    lsr.l #2,d1
-	    sub.w  d1,d0		; Guess for kernel
-	    move.w d0,procmem		; guesses for now
-
-            rts
+	    move.w #64,ramsize
+	    move.w #32,procmem
+        rts
 
 interrupt:
 	    ; C will save and restore a2+/d2+

@@ -5,7 +5,7 @@ SEARCH_DIR(.)
 MEMORY
 {
     rom (rx) : ORIGIN = 0x000000, LENGTH = 0x200000  /* 4MB Cartridge ROM/RAM */
-    rom_disk : ORIGIN = 0x200000, LENGTH = 0x200000
+    rom_disk : ORIGIN = 0x200000, LENGTH = 0x100000
     ram (rw) : ORIGIN = 0xFF0000, LENGTH = 0x010000  /* 64KB RAM */
 }
 
@@ -15,35 +15,16 @@ MEMORY
 SECTIONS
 {
   . = 0x000000;
-  _ROM_Start = .;
+  _rom_start = .;
   .rom_header :
   {
     *(.rom_header)
     __rom_header_end = .;
   } > rom
-  .text :
+  .text : ALIGN(0x4)
   {
-    CREATE_OBJECT_SYMBOLS
     *(.text .text.*)
-
-    . = ALIGN(0x4);
-    /* These are for running static constructors and destructors under ELF.  */
-    KEEP (*crtbegin.o(.ctors))
-    KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
-    KEEP (*(SORT(.ctors.*)))
-    KEEP (*(.ctors))
-    KEEP (*crtbegin.o(.dtors))
-    KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
-    KEEP (*(SORT(.dtors.*)))
-    KEEP (*(.dtors))
-
     *(.rodata .rodata.*)
-
-    . = ALIGN(0x4);
-    *(.gcc_except_table)
-
-    . = ALIGN(0x4);
-    *(.eh_frame)
 
     . = ALIGN(0x4);
     __INIT_SECTION__ = . ;
@@ -63,7 +44,7 @@ SECTIONS
     _etext = .;
     *(.lit)
   } > rom
-  _ROM_End = .;
+  _rom_end = .;
   
   .data :
   {
@@ -76,6 +57,7 @@ SECTIONS
 
   .bss :
   {
+    _ram_start = .;
     . = ALIGN(0x4);
     __bss_start = . ;
     *(.shbss)
@@ -85,20 +67,4 @@ SECTIONS
     __end = _end;
   } > ram
 
-  /* Keep DWARF debug sections */
-  .debug_info 0 : { *(.debug_info) }
-  .debug_abbrev 0 : { *(.debug_abbrev) }
-  .debug_line 0 : { *(.debug_line) }
-
-  /* Remove STABS - redundant with DWARF */
-  /*
-  .stab 0 (NOLOAD) :
-  {
-      *(.stab)
-  }
-  .stabstr 0 (NOLOAD) :
-  {
-      *(.stabstr)
-  }
-  */
 }
