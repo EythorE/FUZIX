@@ -4,7 +4,7 @@
 
 // /* ROM ramdisk definitions */
 #define BLKSHIFT 9             /* 512 byte blocks */
-#define DEV_RD_ROM_PAGES 4096     /* size of the ROM disk (/dev/rd0) in 512B pages */
+#define DEV_RD_ROM_PAGES 2048     /* size of the ROM disk (/dev/rd0) in 512B pages */
 // #define DEV_RD_RAM_PAGES 8      /* size of the RAM disk (/dev/rd1) in 512B pages */
 
 #define DEV_RD_ROM_START ((uint32_t)0x200000)

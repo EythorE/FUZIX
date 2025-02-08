@@ -28,8 +28,8 @@ plt_idle:
 	    stop #($2000+EI_MASK)
 	    rts
 init_hardware:
-	    move.w #64,ramsize
-	    move.w #32,procmem
+	    move.w #1024,ramsize
+	    move.w #512,procmem
         rts
 
 interrupt:

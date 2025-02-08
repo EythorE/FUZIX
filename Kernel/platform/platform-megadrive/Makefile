@@ -71,7 +71,8 @@ IMAGES = $(FUZIX_ROOT)/Images/$(TARGET)
 # 4096*512b blocks = 2MB
 # 
 diskimage: image
-	(cd $(FUZIX_ROOT)/Standalone/filesystem-src; ./build-mini-filesystem -X $(IMAGES)/filesys.img 64 4096)
-	dd if=../../fuzix.bin of=$(IMAGES)/fuzix.rom bs=2M conv=notrunc
-	dd if=$(IMAGES)/filesys.img of=$(IMAGES)/fuzix.rom bs=2M seek=1 conv=notrunc
+	(cd $(FUZIX_ROOT)/Standalone/filesystem-src; ./build-mini-filesystem -X $(IMAGES)/filesys.img 64 2048)
+	cp ../../fuzix.bin $(IMAGES)/fuzix.bin
+	dd if=$(IMAGES)/fuzix.bin of=$(IMAGES)/fuzix.rom bs=1M conv=notrunc
+	dd if=$(IMAGES)/filesys.img of=$(IMAGES)/fuzix.rom bs=1M seek=2 conv=notrunc
 

@@ -1,70 +1,60 @@
 OUTPUT_ARCH(m68k)
 
-SEARCH_DIR(.)
-
 MEMORY
 {
-    rom (rx) : ORIGIN = 0x000000, LENGTH = 0x200000  /* 4MB Cartridge ROM/RAM */
-    rom_disk : ORIGIN = 0x200000, LENGTH = 0x100000
-    ram (rw) : ORIGIN = 0xFF0000, LENGTH = 0x010000  /* 64KB RAM */
+    rom (rx) : ORIGIN = 0x000000, LENGTH = 0x200000  /* 2MB Cartridge ROM */
+    rom_disk : ORIGIN = 0x200000, LENGTH = 0x100000  /* 1MB Cartridge ROM disk */
+    ram (rw) : ORIGIN = 0x300000, LENGTH = 0x100000  /* 1MB Cartridge RAM */
+    udata (rw) : ORIGIN = 0xFF0000, LENGTH = 0x10000 /* 64KB RAM */
 }
 
-/*
- * System in ROM, data/bss in RAM
- */
+PROVIDE(_rom_start = ORIGIN(rom));
+PROVIDE(_rom_end = ORIGIN(rom) + LENGTH(rom));
+PROVIDE(_rd_start = ORIGIN(rom_disk));
+PROVIDE(_rd_end = ORIGIN(rom_disk) + LENGTH(rom_disk));
+PROVIDE(_ram_start = ORIGIN(ram));
+PROVIDE(_ram_end = ORIGIN(ram) + LENGTH(ram));
+
 SECTIONS
 {
-  . = 0x000000;
-  _rom_start = .;
-  .rom_header :
-  {
-    *(.rom_header)
-    __rom_header_end = .;
-  } > rom
-  .text : ALIGN(0x4)
-  {
-    *(.text .text.*)
-    *(.rodata .rodata.*)
+    .rom_header :    
+    { 
+        _rom_header_start = .;
+        *(.rom_header)
+        _rom_header_end = .;
+    } > rom
 
-    . = ALIGN(0x4);
-    __INIT_SECTION__ = . ;
-    LONG (0x4e560000)   /* linkw %fp,#0 */
-    *(.init)
-    SHORT (0x4e5e)      /* unlk %fp */
-    SHORT (0x4e75)      /* rts */
+    .text : ALIGN(2) 
+    { 
+        _text_start = .;
+        *(.text .text.*)
+        _text_end = .;
+    } > rom
 
-    . = ALIGN(0x4);
-    __FINI_SECTION__ = . ;
-    LONG (0x4e560000)   /* linkw %fp,#0 */
-    *(.fini)
-    SHORT (0x4e5e)      /* unlk %fp */
-    SHORT (0x4e75)      /* rts */
+    .rodata : ALIGN(2) 
+    { 
+        _rodata_start = .;
+        *(.rodata .rodata.*)
+        _rodata_end = .;
+    } > rom
 
-    . = ALIGN(0x4);
-    _etext = .;
-    *(.lit)
-  } > rom
-  _rom_end = .;
-  
-  .data :
-  {
-    _data = .;
-    *(.got.plt) *(.got)
-    *(.shdata)
-    *(.data .data.*)
-    _edata = .;
-  } > ram AT >rom
+    _data_load = LOADADDR(.data);
+    .data : ALIGN(2) 
+    {
+        _data_start = .;
+        *(.data .data.*)
+        _data_end = .;
+    } > ram AT> rom
 
-  .bss :
-  {
-    _ram_start = .;
-    . = ALIGN(0x4);
-    __bss_start = . ;
-    *(.shbss)
-    *(.bss .bss.*)
-    *(COMMON)
-    _end =  ALIGN (0x8);
-    __end = _end;
-  } > ram
+    .bss (NOLOAD) : ALIGN(2)
+    {
+        _bss_start = .;
+        *(.bss .bss.*)
+        *(COMMON)
+        _bss_end = .;
+    } > ram
 
+    .debug_info 0 : { *(.debug_info) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_line 0 : { *(.debug_line) }
 }

@@ -1,7 +1,7 @@
 #include "../control_ports.def"
 
 .include "macros.S"
-    .section .bss
+    .section .data
     .globl shift_is_down, scancode_buffer
 
 # 12 nibbles stored in the lower nibble of the bytes (the more significant nibble is $0)

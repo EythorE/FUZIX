@@ -48,23 +48,19 @@ void memzero(void *p, usize_t len)
 
 void pagemap_init(void)
 {
-	// uint8_t r;
-	/* Linker provided end of kernel */
-	/* TODO: create a discard area at the end of the image and start
-	   there */
-	extern uint8_t _end;
+    /* Linker provided symbols for RAM boundaries */
+    extern uint32_t _ram_start;
+    extern uint32_t _ram_end;
+    extern uint32_t _bss_end;
 
-	kprintf("Motorola 680%s%d processor detected.\n",
-		sysinfo.cpu[1]?"":"0",sysinfo.cpu[1]);
+    kprintf("Motorola 680%s%d processor detected.\n",
+        sysinfo.cpu[1]?"":"0", sysinfo.cpu[1]);
 
-    uint32_t e = (uint32_t)&_end;
+    uint32_t free_ram_start = (uint32_t)&_bss_end;
+    uint32_t ram_end = (uint32_t)&_ram_end;
 
-    uint32_t ram_end = 0xFFFFFF;
-    /* Add available RAM block */
-    kmemaddblk((void *)e, ram_end - e);
-    
-    kprintf("RAM: %dKB (%lx-%lx)\n", (ram_end - e)/1024, e, ram_end);
-
+    kmemaddblk((void *)free_ram_start, ram_end - free_ram_start);
+    kprintf("RAM: %dKB (%lx-%lx)\n", (ram_end - free_ram_start)/1024, free_ram_start, ram_end);
 }
 
 // see mm/flat.c

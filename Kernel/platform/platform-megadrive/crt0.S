@@ -14,7 +14,7 @@
 # reads it from 0x0000 on bootup.
 #==============================================================
 .set udata_block_end, udata_block + UBLOCK_SIZE
-	.long   udata_block_end			| Initial stack pointer value
+ 	.long   0xFFF000			| Initial stack pointer value
 	.long   CPU_EntryPoint			| Start of program
 	.long   e_bus_error 			| Bus error
 	.long   e_addr_error 			| Address error
@@ -115,17 +115,19 @@
 	.word 0x0000                 | Checksum
 	.ascii "J               "    | I/O support
 	.long 0x00000000            | Start address of ROM
-	.long 0x00400000            | End address of ROM
-	.long 0x00FF0000             | Start address of RAM
-	.long 0x00FFFFFF             | End address of RAM
-	.long 0x00000000             | SRAM enabled
-	.long 0x00000000             | Unused
-	.long 0x00000000             | Start address of SRAM
-	.long 0x00000000             | End address of SRAM
-	.long 0x00000000             | Unused
-	.long 0x00000000             | Unused
-	.ascii "                                        " | Notes (unused)
-	.ascii "  E             "    | Country codes
+	.long 0x002FFFFF            | End address of ROM
+	.long 0x00300000             | Start address of RAM
+	.long 0x003FFFFF             | End address of RAM
+	.ascii "RA"                  | SRAM enabled
+	.byte 0xE0
+	.byte 0x20
+	.long 0x00300000             | Start address of SRAM
+	.long 0x003FFFFF             | End address of SRAM
+	.long 0x00000000             | 12 bytes	Modem support
+	.long 0x00000000             | \
+	.long 0x00000000             | \
+	.ascii "                                        " | (reserved, fill with spaces)
+	.ascii "  E             "    | 3 bytes	Region support 13 bytes	(reserved, fill with spaces)
 
 
     .section .text
@@ -142,7 +144,7 @@
 # Vertical interrupt - run once per frame
 INT_VInterrupt:
     movem.l %d0-%d7/%a0-%a6,-(%sp)    | Save registers
-    jsr     plt_interrupt            | Call C handler
+    jsr     plt_interrupt             | Call C handler
     movem.l (%sp)+,%d0-%d7/%a0-%a6    | Restore registers
 	rte
 
@@ -167,12 +169,13 @@ CPU_EntryPoint:
 	# Initialise the Mega Drive
 	#==============================================================
 
+
+
 	# Write the TMSS signature (if a model 1+ Mega Drive)
 	jsr    VDP_WriteTMSS
 
 	# Load the initial VDP registers
 	jsr    VDP_LoadRegisters
-
 
 	jsr VDP_ClearVRAM
 	
@@ -180,7 +183,9 @@ CPU_EntryPoint:
 	# Initialise status register and set interrupt level.
 	# This begins firing vertical and horizontal interrupts.
 	#==============================================================
-	move.w #0x2300,%sr
+	move.w #0x2700,%sr
+	# Move data from .data to .bss
+	#jsr init_data
 
 	#==============================================================
 	#  Write color pallete to cram
@@ -192,30 +197,15 @@ CPU_EntryPoint:
 	#==============================================================
 	jsr fontInit
 
-    jsr initKeyboard  
+    jsr initKeyboard
+
 
 
 start:
-		or #0x0700,%sr
-		move.l #_etext,%a0
-		move.l #_data,%a1
-		move.l #_edata,%d0
-		sub.l  #_data,%d0
-		lsr.w #2,%d0
-dcopy:
-		# We may copy a byte or two extra doesn't matter
-		# as the BSS clear happens next
-		move.l (%a0)+,(%a1)+
-		dbra.w %d0,dcopy
+	jsr init_data
 
-		move.l #__bss_start,%a0
-		move.l #__end,%d0
-		sub.l %a0,%d0
-		lsr.l #2,%d0
-wipebss:
-		clr.l (%a0)+
-		dbra %d0,wipebss
 
+	move.l   udata_block_end,%sp
 		bsr init_early
 		bsr init_hardware
 		bsr fuzix_main
@@ -225,4 +215,44 @@ stop:		bra stop
 cpu_type:
         moveq #0,%d0 | 68000
         move.b %d0,cpu_has_trapvec
+        rts
+
+#==============================================================
+# DATA INITIALIZATION ROUTINE
+#==============================================================
+# Initializes the data section by copying from ROM to RAM and
+# clears the BSS section. Must be called before accessing any
+# variables.
+#
+# Copies data from _data_load in ROM to _data_start in RAM,
+# copying until _data_end.
+# Then clears BSS section from _bss_start to _bss_end
+#
+# Trashes: %a0, %a1, %d0
+#==============================================================
+init_data:
+        move.l  #_data_load, %a0         | Source address in ROM
+        move.l  #_data_start, %a1        | Destination address in RAM
+        move.l  #_data_end, %d0
+        sub.l   #_data_start, %d0        | Calculate size
+        beq.s   .Ldata_done              | Skip if no data to copy
+
+.Lcopy_loop:
+        move.b  (%a0)+, (%a1)+          | Copy byte and increment pointers
+        subq.l  #1, %d0                 | Decrement counter
+        bne.s   .Lcopy_loop             | Continue if not done
+
+.Ldata_done:
+        # Clear BSS
+        move.l  #_bss_start, %a0        | Start of BSS
+        move.l  #_bss_end, %d0          
+        sub.l   #_bss_start, %d0        | Calculate BSS size
+        beq.s   .Lbss_done              | Skip if no BSS to clear
+
+.Lclear_loop:
+        clr.b   (%a0)+                  | Clear byte and increment pointer
+        subq.l  #1, %d0                 | Decrement counter
+        bne.s   .Lclear_loop
+
+.Lbss_done:
         rts

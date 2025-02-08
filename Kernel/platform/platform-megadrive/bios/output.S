@@ -16,8 +16,8 @@
 # of any size for the "variables". We can then read/write these
 # variables using the offsets' labels.
 #==============================================================
-    .section .bss
-
+    .section .data
+.globl cursor_x,cursor_y,scrolling,vscroll_amount
 cursor_x:
     .byte 0
 cursor_y:
