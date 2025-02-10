@@ -1,3 +1,12 @@
+# It boots!!!
+needed to add few important thinks to the config:
+Maybe this: who knows:
+/* This is important for some reason*/
+#define CONFIG_SPLIT_ID
+#define CONFIG_PARENT_FIRST
+
+Then fsck was messed up, so that needed to be removed from etc-files/rc
+
 # Interrupts
 Fuzix uses the mask defined in kernel.def to enable or disable interupts.  
 Normally on the mega drive we use:
@@ -18,7 +27,7 @@ However, for Fuzix we are using
 <https://forums.sonicretro.org/index.php?threads/enabling-and-disabling-interrupts-the-why.42650/>
 
 # TODO
-- implement a rom disk to load the kernel from; whatever that means
+-check implement a rom disk to load the kernel from; whatever that means
 - Check if backspace can be implemented; return ascii for backspace to tty
 - Switch to fuzix based VT; Fuzix has an 8x8 font and some keyboard handling
 

@@ -2,8 +2,20 @@
  *	Set these top setings according to your board if different
  */
 
+// #define DEBUG
+// #define DEBUG_MEMORY
+// #define DEBUG_SLEEP
+// #define DEBUG_SYSCALL
+
+/* Enable to make ^Z dump the inode table for debug */
+#undef CONFIG_IDUMP
+/* Enable to make ^A drop back into the monitor */
+#undef CONFIG_MONITOR
+/* Profil syscall support (not yet complete) */
+#undef CONFIG_PROFIL
+
 // /* ROM ramdisk definitions */
-#define BLKSHIFT 9             /* 512 byte blocks */
+#define BLKSHIFT 9                 /* 512 byte blocks */
 #define DEV_RD_ROM_PAGES 2048     /* size of the ROM disk (/dev/rd0) in 512B pages */
 // #define DEV_RD_RAM_PAGES 8      /* size of the RAM disk (/dev/rd1) in 512B pages */
 
@@ -13,10 +25,11 @@
 // #define DEV_RD_RAM_SIZE  ((uint32_t)DEV_RD_RAM_PAGES << BLKSHIFT)
 
 
-#define DEBUG
-#define DEBUG_MEMORY
-#define DEBUG_SLEEP
-
+/* Size for a slightly bigger setup than the little 8bit boxes */
+#define PTABSIZE	32
+#define OFTSIZE		30
+#define ITABSIZE	50
+#define UFTSIZE		16
 
 // #define TICKSPERSEC 300   /* Ticks per second */
 // #define PROGBASE    0x0000  /* also data base */
@@ -35,8 +48,8 @@
 #define BOOT_TTY 513        /* Set this to default device for stdio, stderr */
 
 #define CONFIG_SPLIT_UDATA	/* Adjacent addresses but different bank! */
-#define UDATA_BLKS  4		/* One block of udata */
-#define UDATA_SIZE  512		/* 512 bytes of udata */
+#define UDATA_SIZE	1024
+#define UDATA_BLKS	2
 #define MAX_SWAPS   0	    	/* We will size if from the partition */
 
 // /* Support a 40 column console for now */
@@ -51,20 +64,19 @@
 
 #define CONFIG_SYSCLK	7670000    /* 7.67MHz */
 
-/* Enable to make ^Z dump the inode table for debug */
-#undef CONFIG_IDUMP
-/* Enable to make ^A drop back into the monitor */
-#undef CONFIG_MONITOR
-/* Profil syscall support (not yet complete) */
-#undef CONFIG_PROFIL
 
-/* Remove all banking related config */
 #undef CONFIG_MULTI
-#define CONFIG_BANKS    0        /* No bank switching */
 #undef CONFIG_SPLIT_ID
 #undef CONFIG_SPLIT_UDATA
 
-/* Keep flat memory model */
+/* This is important for some reason*/
+#define CONFIG_SPLIT_ID
+#define CONFIG_PARENT_FIRST
+
+/* Not meaningful but we currently chunk to 512 bytes */
+#define CONFIG_BANKS 	(65536/512)
+
+
 #define CONFIG_FLAT
 #define CONFIG_32BIT
 #define CONFIG_LEVEL_2
@@ -76,3 +88,9 @@
 
 
 #define plt_copyright()
+
+/* Size for a slightly bigger setup than the little 8bit boxes */
+#define PTABSIZE	32
+#define OFTSIZE		30
+#define ITABSIZE	50
+#define UFTSIZE		16
