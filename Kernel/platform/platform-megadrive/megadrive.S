@@ -1,5 +1,6 @@
 
 #include "../../cpu-68000/kernel-68000.def"
+#include "kernel.def"
 
 		.globl plt_reboot
 		.globl init_early
@@ -9,14 +10,34 @@
 		.globl plt_idle
 		.globl outchar
 		.globl plt_monitor
+		.globl plt_timer_interrupt
 
+	.section .rodata
+monitor_message: .asciz "\nplt_monitor..."
+test_message: .asciz "\ntest...\n"
+	.even
+
+	.section .text
 .mri 1
 plt_monitor:
-	; Need to check if top of memory at FE7000, if so
-	; copy vectors from FE7000 to 0 (where we saved them)
-	; them jmp to FE8000
+	pea monitor_message
+	jsr printString
+	addq.l #4,sp
+loop:
+	bra loop
+
+
+plt_timer_interrupt:
+    move.w  sr,d0            ; Get status register into d0
+    and.w   #DI_MASK,d0      ; Mask off all but interrupt bits
+    bne     .skip            ; If any interrupt bits set, skip timer
+    jsr     timer_interrupt  ; Call timer if interrupts enabled
+.skip:
+    rts 
+
+
 plt_reboot:
-	    or #$0700,sr
+	    or #$2700,sr
 	    jmp start
 
 init_early:
@@ -27,12 +48,16 @@ init_early:
 plt_idle:
 	    stop #($2000+EI_MASK)
 	    rts
+
 init_hardware:
 	    move.w #1024,ramsize
 	    move.w #512,procmem
         rts
 
 interrupt:
+	pea test_message
+	jsr printString
+	addq.l #4,sp
 	    ; C will save and restore a2+/d2+
 	    movem.l a0-a1/a5/d0-d1,-(sp)
 	    move.l udata_shadow,a5	; set up the register global
@@ -59,6 +84,7 @@ interrupt:
 	    ori.b #PFL_BATCH,P_TAB__P_FLAGS_OFFSET(a0)
 no_ready:
 	    bsr switchout
+
 no_preempt:
 	    tst.b U_DATA__U_CURSIG(a5)
 	    beq no_signal

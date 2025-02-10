@@ -24,14 +24,14 @@ SECTIONS
         _rom_header_end = .;
     } > rom
 
-    .text : ALIGN(2) 
+    .text : ALIGN(4) 
     { 
         _text_start = .;
         *(.text .text.*)
         _text_end = .;
     } > rom
 
-    .rodata : ALIGN(2) 
+    .rodata : ALIGN(4) 
     { 
         _rodata_start = .;
         *(.rodata .rodata.*)
@@ -39,14 +39,14 @@ SECTIONS
     } > rom
 
     _data_load = LOADADDR(.data);
-    .data : ALIGN(2) 
+    .data : ALIGN(4) 
     {
         _data_start = .;
         *(.data .data.*)
         _data_end = .;
     } > ram AT> rom
 
-    .bss (NOLOAD) : ALIGN(2)
+    .bss (NOLOAD) : ALIGN(4)
     {
         _bss_start = .;
         *(.bss .bss.*)

@@ -91,7 +91,8 @@ void tty_data_consumed(uint_fast8_t minor)
 {
 }
 
-extern char readKey();  // Keep existing external assembly routine
+extern void plt_timer_interrupt();
+extern char readKey();
 void plt_interrupt(void)
 {
     static uint8_t ticker = 0;
@@ -101,6 +102,6 @@ void plt_interrupt(void)
     /* Use power of 2 mask (0x07 = 7) for efficient modulo */
     ticker = (ticker + 1) & 0x07;  /* Same as % 8 but faster */
     if ((ticker & 0x03) == 0) {    /* Every 4th tick */
-        timer_interrupt();
+        plt_timer_interrupt();
     }
 }

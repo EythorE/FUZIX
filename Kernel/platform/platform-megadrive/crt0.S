@@ -14,7 +14,7 @@
 # reads it from 0x0000 on bootup.
 #==============================================================
 .set udata_block_end, udata_block + UBLOCK_SIZE
- 	.long   0xFFF000			| Initial stack pointer value
+ 	.long   0xFFE000				| Initial stack pointer value
 	.long   CPU_EntryPoint			| Start of program
 	.long   e_bus_error 			| Bus error
 	.long   e_addr_error 			| Address error
@@ -165,18 +165,22 @@ INT_HInterrupt:
 #==============================================================
 
 CPU_EntryPoint:
-	#==============================================================
-	# Initialise the Mega Drive
-	#==============================================================
-
-
-
+#==============================================================
+# Initialise the Mega Drive
+#==============================================================
+	#=======================================================
 	# Write the TMSS signature (if a model 1+ Mega Drive)
+	#=======================================================
 	jsr    VDP_WriteTMSS
 
+	#=======================================================
 	# Load the initial VDP registers
+	#=======================================================
 	jsr    VDP_LoadRegisters
 
+	#=======================================================
+	# Clear random data from VRAM
+	#===============================================
 	jsr VDP_ClearVRAM
 	
 	#==============================================================
@@ -184,11 +188,9 @@ CPU_EntryPoint:
 	# This begins firing vertical and horizontal interrupts.
 	#==============================================================
 	move.w #0x2700,%sr
-	# Move data from .data to .bss
-	#jsr init_data
 
 	#==============================================================
-	#  Write color pallete to cram
+	# Write color pallete to cram
 	#==============================================================
 	jsr VDP_writePallete
 
@@ -197,20 +199,21 @@ CPU_EntryPoint:
 	#==============================================================
 	jsr fontInit
 
+	#==============================================================
+	# Init keyboard communication
+	#==============================================================
     jsr initKeyboard
-
 
 
 start:
 	jsr init_data
-
-
 	move.l   udata_block_end,%sp
-		bsr init_early
-		bsr init_hardware
-		bsr fuzix_main
-		or #0x0700,%sr
-stop:		bra stop
+	bsr init_early
+	bsr init_hardware
+	bsr fuzix_main
+	or #0x0700,%sr
+stop:
+	bra stop
 
 cpu_type:
         moveq #0,%d0 | 68000

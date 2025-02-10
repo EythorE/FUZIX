@@ -15,6 +15,7 @@
 
 #define DEBUG
 #define DEBUG_MEMORY
+#define DEBUG_SLEEP
 
 
 // #define TICKSPERSEC 300   /* Ticks per second */
@@ -34,15 +35,14 @@
 #define BOOT_TTY 513        /* Set this to default device for stdio, stderr */
 
 #define CONFIG_SPLIT_UDATA	/* Adjacent addresses but different bank! */
-#define UDATA_BLKS  1		/* One block of udata */
+#define UDATA_BLKS  4		/* One block of udata */
 #define UDATA_SIZE  512		/* 512 bytes of udata */
-#define MAX_SWAPS   2	    	/* We will size if from the partition */
+#define MAX_SWAPS   0	    	/* We will size if from the partition */
 
 // /* Support a 40 column console for now */
 // #define CONFIG_VT
 // #define VT_RIGHT 39
 // #define VT_BOTTOM 24
-
 
 
 /* We need a tidier way to do this from the loader */
