@@ -1,0 +1,8 @@
+package  platform-megadrive
+
+disable-pkg ALL platform-megadrive
+enable-pkg basefs util-mini V7-cmd-micro V7-sh V7-games
+
+# Remove standard rc/inittab and add our platform versions
+r /etc/rc
+f 0755 /etc/rc             rc

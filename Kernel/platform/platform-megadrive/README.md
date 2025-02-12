@@ -1,3 +1,8 @@
+# TODO
+v7-games do not work
+make filesystem writeable
+implement vt video terminal
+
 # It boots!!!
 needed to add few important thinks to the config:
 Maybe this: who knows:
