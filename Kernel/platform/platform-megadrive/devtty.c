@@ -4,7 +4,13 @@
 #include <stdbool.h>
 #include <tty.h>
 #include <devtty.h>
-// #include <vt.h>
+#include <vt.h>
+
+// vt
+uint8_t vtattr_cap = 0; /* TODO: colour */
+void vtattr_notify(void)
+{
+}
 
 
 static unsigned char tbuf1[TTYSIZ];
@@ -29,17 +35,23 @@ void kputchar(uint_fast8_t c)
 	tty_putc(1, c);
 }
 
-extern void printString(uint_fast8_t *str);  // External assembly routine
-void tty_putc(uint_fast8_t minor, uint_fast8_t c)
+// extern void printString(uint_fast8_t *str);  // External assembly routine
+// void tty_putc(uint_fast8_t minor, uint_fast8_t c)
+// {
+//     uint_fast8_t buffer[2] = {0, 0};  // Buffer to store the character and null terminator
+//     buffer[0] = c;  // Read a character using the external function
+//     printString(buffer);    // Print the character
+// }
+
+void tty_putc(uint8_t minor, unsigned char c)
 {
-    uint_fast8_t buffer[2] = {0, 0};  // Buffer to store the character and null terminator
-    buffer[0] = c;  // Read a character using the external function
-    printString(buffer);    // Print the character
+	minor;
+	vtoutput(&c, 1);
 }
 
 ttyready_t tty_writeready(uint_fast8_t minor)
 {
-        return TTY_READY_NOW;
+    return TTY_READY_NOW;
 }
 
 void tty_sleeping(uint_fast8_t minor)

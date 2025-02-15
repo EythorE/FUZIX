@@ -25,6 +25,13 @@
 // #define DEV_RD_RAM_SIZE  ((uint32_t)DEV_RD_RAM_PAGES << BLKSHIFT)
 
 
+#define CONFIG_VT
+#define VT_WIDTH	40
+#define VT_HEIGHT	28
+#define VT_RIGHT	39
+#define VT_BOTTOM	27
+
+
 /* Size for a slightly bigger setup than the little 8bit boxes */
 #define PTABSIZE	32
 #define OFTSIZE		30

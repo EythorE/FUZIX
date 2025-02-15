@@ -207,7 +207,7 @@ CPU_EntryPoint:
 
 start:
 	jsr init_data
-	move.l   udata_block_end,%sp
+	move.l udata_block_end,%sp
 	bsr init_early
 	bsr init_hardware
 	bsr fuzix_main

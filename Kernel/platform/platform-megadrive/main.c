@@ -4,32 +4,12 @@
 #include <kdata.h>
 #include <printf.h>
 
-extern char readKey();  // External assembly routine
-extern void printString(char *str);  // External assembly routine
-// void _start() {
-//     char buffer[2] = {0, 0};  // Buffer to store the character and null terminator
-//     printString("Input: ");
-//     while (1) {
-//         buffer[0] = readKey();  // Read a character using the external function
-//         printString(buffer);    // Print the character
-//     }
-// }
-
-// uint16_t swap_dev = 0xFFFF;
-
-void do_beep(void)
-{
-}
-
-/*
- *	MMU initialize
- */
 
 void map_init(void)
 {
 }
 
-uaddr_t ramtop;
+// uaddr_t ramtop;
 uint8_t need_resched;
 
 uint8_t plt_param(char *p)
@@ -46,6 +26,7 @@ void memzero(void *p, usize_t len)
 	memset(p, 0, len);
 }
 
+extern void clear_across(int8_t y, int8_t x, int16_t num);
 void pagemap_init(void)
 {
     /* Linker provided symbols for RAM boundaries */

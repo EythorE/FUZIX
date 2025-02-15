@@ -1,5 +1,5 @@
 umask 022
-fsck -a /
+#fsck -a /
 setdate
 remount -n / rw
 prtroot >/etc/mtab

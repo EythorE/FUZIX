@@ -14,14 +14,14 @@
 
 	.section .rodata
 monitor_message: .asciz "\nplt_monitor..."
-test_message: .asciz "\ntest...\n"
+test_message: .asciz "\nwe had an interupt...\n"
 	.even
 
 	.section .text
 .mri 1
 plt_monitor:
 	pea monitor_message
-	jsr printString
+	jsr kprintf
 	addq.l #4,sp
 loop:
 	bra loop
@@ -41,9 +41,9 @@ plt_reboot:
 	    jmp start
 
 init_early:
-	   lea.l udata_block,a5	; udata ptr
-	   move.l a5,udata_shadow	; shadow copy for entry/exit
-            rts
+		lea.l udata_block,a5	; udata ptr
+	   	move.l a5,udata_shadow	; shadow copy for entry/exit
+        rts
 
 plt_idle:
 	    stop #($2000+EI_MASK)
@@ -56,7 +56,7 @@ init_hardware:
 
 interrupt:
 	pea test_message
-	jsr printString
+	jsr kprintf
 	addq.l #4,sp
 	    ; C will save and restore a2+/d2+
 	    movem.l a0-a1/a5/d0-d1,-(sp)

@@ -4,7 +4,7 @@ COBJS = $(CSRCS:.c=$(BINEXT))
 BSRC = $(wildcard bios/*.S)
 BOBJS = $(patsubst bios/%.S,%.o, $(BSRC))
 
-ASRCS = crt0.S tricks.S megadrive.S devrd_rdcpy.S
+ASRCS = crt0.S tricks.S megadrive.S devrd_rdcpy.S devvt.S
 AOBJS = $(ASRCS:.S=.o)
 
 # DSRCS = ../../dev/devrd.c
@@ -45,7 +45,7 @@ clean:
 
 image: fuzix.ld $(AOBJS) $(BOBJS)  main.o devtty.o kernel.def
 	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(AOBJS) $(BOBJS) devrd.o main.o devtty.o \
-	../../start.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
+	../../vt.o ../../start.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
 	../../timer.o ../../kdata.o 68000exception.o devices.o \
 	../../devio.o ../../filesys.o ../../process.o ../../inode.o ../../syscall_fs.o \
 	../../syscall_proc.o ../../syscall_other.o ../../mm.o ../../flat.o \
