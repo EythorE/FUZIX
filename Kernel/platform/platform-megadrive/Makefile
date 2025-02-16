@@ -4,7 +4,7 @@ COBJS = $(CSRCS:.c=$(BINEXT))
 BSRC = $(wildcard bios/*.S)
 BOBJS = $(patsubst bios/%.S,%.o, $(BSRC))
 
-ASRCS = crt0.S tricks.S megadrive.S devrd_rdcpy.S devvt.S
+ASRCS = crt0.S tricks.S megadrive.S devvt.S
 AOBJS = $(ASRCS:.S=.o)
 
 # DSRCS = ../../dev/devrd.c

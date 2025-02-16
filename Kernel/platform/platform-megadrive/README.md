@@ -1,20 +1,29 @@
+Running fsck messes up the system, most apps and utilities crash.
+crt0.o is added to the file system in ./Library/libs/fuzix-libs.pkg, I thought it was just a bootloader?
+
+
 # C abi that seems to match gcc
 https://m680x0.github.io/doc/abi.html
 An integral return value is put in %d0, whereas a pointer return value is put in %a0.
 When it comes to returning an aggregate-type object, the object should be stored in memory and its address will be put in %a1:
 
 # TODO
-- [] v7-games do not work
-- [] make filesystem writeable
+- [] Fix interrupt handling in megadrive.S.
+- [] Interrupt handling in Kernel/cpu-68000/lowlevel-68000.S:784 seems it needs fixing. 
+- [x] make filesystem writeable
 - [x] check implement a rom disk to load the kernel from; whatever that means
 - [x] Check if backspace can be implemented; return ascii for backspace to tty
-- [x] Switch to fuzix based VT;
+- [x] Switch to fuzix based VT; I have a feeling that the old code was significantly less complex and faster.
 - [] Fuzix has an 8x8 font
 - [] ...and some keyboard handling
+- [] implement outchar for Kernel/cpu-68000/lowlevel-68000.S debug routines
+- [] add a suitable monitor which we can fall back to for debugging (plt_monitor)
 
 ## non-working apps
+- mount: causes Bus error
 - touch
 - fsck
+- v7-games
 
 # It's writeable
 Blastem requires that the writeable portion of the cartridge address space is specified in the rom header (as sram in our use-case).

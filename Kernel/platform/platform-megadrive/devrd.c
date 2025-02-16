@@ -28,17 +28,26 @@ static const uint32_t dev_start[NUM_DEV_RD] = {
 };
 
 
-extern uint32_t rd_cpy(void *dst, void *src, uint32_t count);
+// extern uint32_t rd_cpy(void *dst, void *src, uint32_t count);
+
+// From: Kernel/cpu-68000/lowlevel-68000.S
+// Copies num 512 byte, dword aligned blocks as fast as possible
+// from source to dest, which must not overlap.
+/* Memory helpers: Max of 32767 blocks (16MB) as written - Kernel/cpu-68000/cpu.h */ 
+extern void copy_blocks(void *, void *, unsigned int);
+
+
 
 /* implements both rd_read and rd_write */
 static int rd_transfer(bool is_read, uint_fast8_t minor, uint_fast8_t rawflag)
 {
     uint32_t src_addr, dst_addr;
-
+    uint32_t count = udata.u_nblock << BLKSHIFT;
     uint32_t blk_addr = dev_start[minor] + ((uint32_t)udata.u_block << BLKSHIFT);
     
     /* Check if access would exceed device limits */
-    if (blk_addr >= dev_limit[minor]) {
+    if (blk_addr >= dev_limit[minor] || 
+        blk_addr + count > dev_limit[minor]) {
         udata.u_error = EIO;
         return -1;
     }
@@ -56,16 +65,8 @@ static int rd_transfer(bool is_read, uint_fast8_t minor, uint_fast8_t rawflag)
             return -1;
         }
     }
-    
-    /* Calculate transfer size in bytes */
-    uint32_t count = udata.u_nblock << BLKSHIFT;
 
-    // kprintf("minor: %u rd_cpy(dst: %l, src: %l, count: %u)\n",
-    //     minor, dst_addr, src_addr, count);
-    
-    /* Do the copy */
-    rd_cpy((void *)dst_addr, (void *)src_addr, count);
-    
+    copy_blocks((void *)dst_addr, (void *)src_addr, udata.u_nblock);
     return count;
 }
 
