@@ -14,16 +14,16 @@
 /* Profil syscall support (not yet complete) */
 #undef CONFIG_PROFIL
 
+
 // /* ROM ramdisk definitions */
 #define BLKSHIFT 9                 /* 512 byte blocks */
-#define DEV_RD_ROM_PAGES 2048     /* size of the ROM disk (/dev/rd0) in 512B pages */
-// #define DEV_RD_RAM_PAGES 8      /* size of the RAM disk (/dev/rd1) in 512B pages */
+#define DEV_RD_ROM_PAGES 3968     /* size of the ROM disk (/dev/rd0) in 512B pages */
+#define DEV_RD_RAM_PAGES 3072      /* size of the RAM disk (/dev/rd1) in 512B pages */
 
-#define DEV_RD_ROM_START ((uint32_t)0x200000)
-// #define DEV_RD_RAM_START ((uint32_t)(256-DEV_RD_RAM_PAGES) << BLKSHIFT)
+#define DEV_RD_ROM_START ((uint32_t)0x010000)
+#define DEV_RD_RAM_START ((uint32_t)0x200000)
 #define DEV_RD_ROM_SIZE  ((uint32_t)DEV_RD_ROM_PAGES << BLKSHIFT)
-// #define DEV_RD_RAM_SIZE  ((uint32_t)DEV_RD_RAM_PAGES << BLKSHIFT)
-
+#define DEV_RD_RAM_SIZE  ((uint32_t)DEV_RD_RAM_PAGES << BLKSHIFT)
 
 #define CONFIG_VT
 #define VT_WIDTH	40
@@ -51,7 +51,7 @@
 
 /* Basic device defines needed by kernel */
 #define NBUFS    4        /* Number of buffers */
-#define NMOUNTS  1        /* Number of mounts */
+#define NMOUNTS  2        /* Number of mounts */
 #define BOOT_TTY 513        /* Set this to default device for stdio, stderr */
 
 #define CONFIG_SPLIT_UDATA	/* Adjacent addresses but different bank! */

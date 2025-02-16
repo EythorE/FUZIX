@@ -12,14 +12,19 @@
 #include <printf.h>
 #include "devrd.h"
 
+/* minor device numbers */
+#define RD_MINOR_ROM     0
+#define RD_MINOR_RAM     1
+#define NUM_DEV_RD       2
+
 static const uint32_t dev_limit[NUM_DEV_RD] = {
     DEV_RD_ROM_START+DEV_RD_ROM_SIZE, /* /dev/rd0: ROM */
-    // DEV_RD_RAM_START+DEV_RD_RAM_SIZE, /* /dev/rd1: RAM */
+    DEV_RD_RAM_START+DEV_RD_RAM_SIZE, /* /dev/rd1: RAM */
 };
 
 static const uint32_t dev_start[NUM_DEV_RD] = {
     DEV_RD_ROM_START, /* /dev/rd0: ROM */
-    // DEV_RD_RAM_START, /* /dev/rd1: RAM */
+    DEV_RD_RAM_START, /* /dev/rd1: RAM */
 };
 
 
@@ -54,6 +59,9 @@ static int rd_transfer(bool is_read, uint_fast8_t minor, uint_fast8_t rawflag)
     
     /* Calculate transfer size in bytes */
     uint32_t count = udata.u_nblock << BLKSHIFT;
+
+    // kprintf("minor: %u rd_cpy(dst: %l, src: %l, count: %u)\n",
+    //     minor, dst_addr, src_addr, count);
     
     /* Do the copy */
     rd_cpy((void *)dst_addr, (void *)src_addr, count);
@@ -80,6 +88,8 @@ int rd_open(uint_fast8_t minor, uint16_t flags)
 {
     flags; /* unused */
 
+    kprintf("open minor %u ", minor);
+
     switch(minor){
 #if DEV_RD_RAM_PAGES > 0
         case RD_MINOR_RAM:
@@ -91,6 +101,7 @@ int rd_open(uint_fast8_t minor, uint16_t flags)
             return 0;
 #endif
         default:
+            kprintf("Fail: no devrd minor=%d", minor);
             udata.u_error = ENXIO;
             return -1;
     }

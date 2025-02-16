@@ -1,16 +1,41 @@
+# C abi that seems to match gcc
+https://m680x0.github.io/doc/abi.html
+An integral return value is put in %d0, whereas a pointer return value is put in %a0.
+When it comes to returning an aggregate-type object, the object should be stored in memory and its address will be put in %a1:
+
 # TODO
-v7-games do not work
-make filesystem writeable
-implement vt video terminal
+- [] v7-games do not work
+- [] make filesystem writeable
+- [x] check implement a rom disk to load the kernel from; whatever that means
+- [x] Check if backspace can be implemented; return ascii for backspace to tty
+- [x] Switch to fuzix based VT;
+- [] Fuzix has an 8x8 font
+- [] ...and some keyboard handling
+
+## non-working apps
+- touch
+- fsck
+
+# It's writeable
+Blastem requires that the writeable portion of the cartridge address space is specified in the rom header (as sram in our use-case).
+It does not like having the rom overlap the sram addresses. Therefore, to write to that space outside of blastem, we need to create the .sram file.
+This took me ages to figure out; the .sram file is stored in 16-bit little-endian (byte-swapped) compared to the 68k. To fix that I naively just removed the -X flag to build-filesystem-ng which makes it into a little-endian filesystem. Obviously (in retrospect) this has no effect on the binaries put into the filesystem. So, while the kernel is able to read the filesystem all of the files are jumbled up.
+The solution is to pass a regular big-endian blob through dd with swab (byte-swap) to create the .sram.
+
 
 # It boots!!!
-needed to add few important thinks to the config:
+Needed to add few important things to the config:
 Maybe this: who knows:
 /* This is important for some reason*/
 #define CONFIG_SPLIT_ID
 #define CONFIG_PARENT_FIRST
 
 Then fsck was messed up, so that needed to be removed from etc-files/rc
+
+The blastem emulator seems to only supports writing to the cartridge address space if we set it as sram in the rom header.
+I think it is only supported for the top 2MB.
+We implement a rom disk in the bottom 2MB and ram disk in the top 2MB.
+
 
 # Interrupts
 Fuzix uses the mask defined in kernel.def to enable or disable interupts.  
@@ -31,8 +56,4 @@ However, for Fuzix we are using
 > In the case of the Genesis, IRQ2 is assigned to the external interrupt, IRQ4 is assigned to the horizontal blank interrupt, and IRQ6 is assigned to the vertical blank interrupt. Setting the IPL bits to 3 basically just has external interrupt requests ignored, since it falls in range of IRQ1-3. You would wanna set the IPL bits to 0 or 1 if you wanna use external interrupts.
 <https://forums.sonicretro.org/index.php?threads/enabling-and-disabling-interrupts-the-why.42650/>
 
-# TODO
--check implement a rom disk to load the kernel from; whatever that means
-- Check if backspace can be implemented; return ascii for backspace to tty
-- Switch to fuzix based VT; Fuzix has an 8x8 font and some keyboard handling
 

@@ -1,9 +1,9 @@
-package  platform-megadrive
+package  platform-megadrive-disk2
 
-disable-pkg ALL platform-megadrive
+disable-pkg ALL platform-megadrive-disk2
 enable-pkg basefs util-mini V7-cmd-micro V7-sh V7-games cursesgames
 
-d 0755 /root/disk1  
+d 0755 /root/disk2  
 
 # Remove standard rc/inittab and add our platform versions
 r /etc/rc
@@ -11,7 +11,7 @@ f 0755 /etc/rc             rc
 
 r /dev/rd0
 r /dev/rd1
-n 60660 0 /dev/rd0   
+n 60660 0 /dev/rd0
 n 60660 1 /dev/rd1
 
 r /dev/tty2

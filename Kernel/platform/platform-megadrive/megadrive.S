@@ -23,6 +23,8 @@ plt_monitor:
 	pea monitor_message
 	jsr kprintf
 	addq.l #4,sp
+	move.w #$2700,sr
+	jmp start
 loop:
 	bra loop
 
@@ -50,8 +52,8 @@ plt_idle:
 	    rts
 
 init_hardware:
-	    move.w #1024,ramsize
-	    move.w #512,procmem
+	    move.w #512,ramsize
+	    move.w #256,procmem
         rts
 
 interrupt:

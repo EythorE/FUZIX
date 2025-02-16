@@ -1,6 +1,6 @@
 umask 022
 #fsck -a /
-setdate
+# setdate
 remount -n / rw
 prtroot >/etc/mtab
 #Uncomment if you have multiple file systems

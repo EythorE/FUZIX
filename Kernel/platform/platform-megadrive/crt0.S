@@ -115,13 +115,13 @@
 	.word 0x0000                 | Checksum
 	.ascii "J               "    | I/O support
 	.long 0x00000000            | Start address of ROM
-	.long 0x002FFFFF            | End address of ROM
-	.long 0x00300000             | Start address of RAM
+	.long 0x001FFFFF            | End address of ROM
+	.long 0x00380000             | Start address of RAM
 	.long 0x003FFFFF             | End address of RAM
 	.ascii "RA"                  | SRAM enabled
 	.byte 0xE0
 	.byte 0x20
-	.long 0x00300000             | Start address of SRAM
+	.long 0x00200000             | Start address of SRAM
 	.long 0x003FFFFF             | End address of SRAM
 	.long 0x00000000             | 12 bytes	Modem support
 	.long 0x00000000             | \

@@ -55,23 +55,20 @@ image: fuzix.ld $(AOBJS) $(BOBJS)  main.o devtty.o kernel.def
 	68000relocate.o \
 	../../level2.o ../../syscall_level2.o ../../select.o > ../../fuzix.map
 	$(CROSS_COMPILE)objcopy fuzix.elf -O binary ../../fuzix.bin
-# dd if=../../fuzix.bin of=fuzix.rom bs=65536 conv=sync
+
 
 IMAGES = $(FUZIX_ROOT)/Images/$(TARGET)
-
-# diskimage:
-# 	# Make a blank disk image with partition
-# 	dd if=$(FUZIX_ROOT)/Standalone/filesystem-src/parttab.40M of=$(IMAGES)/disk.img bs=40017920 conv=sync
-# 	# Add the file system
-# 	dd if=$(IMAGES)/filesys.img of=$(IMAGES)/disk.img bs=512 seek=2048 conv=notrunc
-# 	# Make an emulator image of it
-# 	cat $(FUZIX_ROOT)/Standalone/filesystem-src/idehdr.40M $(IMAGES)/disk.img > $(IMAGES)/emu-ide.img
-# 	cp fuzix.rom $(IMAGES)
+PKG2 = $(FUZIX_ROOT)/Kernel/platform/platform-megadrive/fuzix-platform-megadrive2.pkg
 
 # 4096*512b blocks = 2MB
-# 
 diskimage:
-	(cd $(FUZIX_ROOT)/Standalone/filesystem-src; ./build-filesystem -X $(IMAGES)/filesystem.img 64 2048)
-	cp ../../fuzix.bin $(IMAGES)/fuzix.bin
-	dd if=$(IMAGES)/fuzix.bin of=$(IMAGES)/fuzix.rom bs=1M conv=notrunc
-	dd if=$(IMAGES)/filesystem.img of=$(IMAGES)/fuzix.rom bs=1M seek=2 conv=notrunc
+	cp ../../fuzix.bin $(IMAGES)/fuzix.rom
+	(cd $(FUZIX_ROOT)/Standalone/filesystem-src; ./build-filesystem-ng -X -f $(IMAGES)/filesystem.img -g 64 3968 -p platform-megadrive)
+	dd if=$(IMAGES)/filesystem.img of=$(IMAGES)/fuzix.rom bs=64K seek=1 conv=notrunc
+	
+	# Filesystem 2
+	(cd $(FUZIX_ROOT)/Standalone/filesystem-src; ./build-filesystem-ng -X -f $(IMAGES)/filesystem2.img -g 64 3072 -p platform-megadrive-disk2)
+	# Blastem does not like to have data in the rom binary in the address space of sram
+	rm -f /home/eythor/.local/share/blastem/fuzix/save.sram
+	# .sram is saved in 16-bit little-endian format (byte-swapped)!!
+	dd if=$(IMAGES)/filesystem2.img of=/home/eythor/.local/share/blastem/fuzix/save.sram bs=1536K conv=notrunc,swab
