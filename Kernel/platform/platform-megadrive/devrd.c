@@ -88,9 +88,6 @@ int rd_write(uint_fast8_t minor, uint_fast8_t rawflag, uint_fast8_t flag)
 int rd_open(uint_fast8_t minor, uint16_t flags)
 {
     flags; /* unused */
-
-    kprintf("open minor %u ", minor);
-
     switch(minor){
 #if DEV_RD_RAM_PAGES > 0
         case RD_MINOR_RAM:
@@ -102,7 +99,6 @@ int rd_open(uint_fast8_t minor, uint16_t flags)
             return 0;
 #endif
         default:
-            kprintf("Fail: no devrd minor=%d", minor);
             udata.u_error = ENXIO;
             return -1;
     }

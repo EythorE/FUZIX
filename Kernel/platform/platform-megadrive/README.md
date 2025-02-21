@@ -1,3 +1,17 @@
+It seems syscalls from userspace are not handled correctly!
+
+We can use Standaloun ucp to browse and manipulate a filesystem
+```Standalone/ucp Images/megadrive/filesystem2.img```
+Or for the byte-reversed .sram then use ucp -b
+
+We can pass CI_TESTING=1 to make to skip the login.
+make CI_TESTING=1 diskimage && blastem Images/megadrive/fuzix.rom
+
+We're getting panic("share") when running touch file.
+touch does not hit panic("share") anymore,
+ps causes floating point exception.
+
+
 Running fsck messes up the system, most apps and utilities crash.
 crt0.o is added to the file system in ./Library/libs/fuzix-libs.pkg, I thought it was just a bootloader?
 
@@ -5,7 +19,8 @@ crt0.o is added to the file system in ./Library/libs/fuzix-libs.pkg, I thought i
 # C abi that seems to match gcc
 https://m680x0.github.io/doc/abi.html
 An integral return value is put in %d0, whereas a pointer return value is put in %a0.
-When it comes to returning an aggregate-type object, the object should be stored in memory and its address will be put in %a1:
+When it comes to returning an aggregate-type object, the object should be stored in memory and its address will be put in %a1.
+arguments are put on the stack in 4 byte bounderies.
 
 # TODO
 - [] Fix interrupt handling in megadrive.S.

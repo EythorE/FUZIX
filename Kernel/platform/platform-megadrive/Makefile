@@ -17,7 +17,7 @@ OBJS  = $(COBJS) $(AOBJS) $(BOBJS) $(DOBJS) $(LOBJS)
 
 CROSS_CCOPTS += -I../../dev/
 
-all:	$(OBJS)
+all: $(OBJS)
 
 $(AOBJS): %.o: %.S
 	$(CROSS_AS) $(ASOPTS) $<
@@ -60,14 +60,23 @@ image: fuzix.ld $(AOBJS) $(BOBJS)  main.o devtty.o kernel.def
 IMAGES = $(FUZIX_ROOT)/Images/$(TARGET)
 PKG2 = $(FUZIX_ROOT)/Kernel/platform/platform-megadrive/fuzix-platform-megadrive2.pkg
 
+
+
 # 4096*512b blocks = 2MB
 diskimage:
+	(cd Applications; $(MAKE))
 	cp ../../fuzix.bin $(IMAGES)/fuzix.rom
 	(cd $(FUZIX_ROOT)/Standalone/filesystem-src; ./build-filesystem-ng -X -f $(IMAGES)/filesystem.img -g 64 3968 -p platform-megadrive)
 	dd if=$(IMAGES)/filesystem.img of=$(IMAGES)/fuzix.rom bs=64K seek=1 conv=notrunc
 	
 	# Filesystem 2
 	(cd $(FUZIX_ROOT)/Standalone/filesystem-src; ./build-filesystem-ng -X -f $(IMAGES)/filesystem2.img -g 64 3072 -p platform-megadrive-disk2)
+		@echo "cd root" > ucp.cmd
+	@echo "get Applications/tapp tapp" >> ucp.cmd
+	@echo "chmod 777 tapp" >> ucp.cmd
+	$(FUZIX_ROOT)/Standalone/ucp $(FUZIX_ROOT)/Images/megadrive/filesystem2.img < ucp.cmd
+	@rm ucp.cmd
+# $(FUZIX_ROOT)/Standalone/ucp $(FUZIX_ROOT)/Images/megadrive/filesystem2.img 'cd root; get Applications/tapp tapp; chmod 777 tapp'
 	# Blastem does not like to have data in the rom binary in the address space of sram
 	rm -f /home/eythor/.local/share/blastem/fuzix/save.sram
 	# .sram is saved in 16-bit little-endian format (byte-swapped)!!

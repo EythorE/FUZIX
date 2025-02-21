@@ -1,7 +1,3 @@
-/*
- *	Set these top setings according to your board if different
- */
-
 // #define DEBUG
 // #define DEBUG_MEMORY
 // #define DEBUG_SLEEP
@@ -59,11 +55,7 @@
 #define UDATA_BLKS	2
 #define MAX_SWAPS   0	    	/* We will size if from the partition */
 
-// /* Support a 40 column console for now */
-// #define CONFIG_VT
-// #define VT_RIGHT 39
-// #define VT_BOTTOM 24
-
+#define BOOTDEVICE 1            /* 1 is the rom disk, 2 is the ram disk */
 
 /* We need a tidier way to do this from the loader */
 #define CMDLINE	NULL	  /* Location of root dev name */
@@ -90,14 +82,17 @@
 
 
 
-
-#define TICKSPERSEC 10   /* Ticks per second */
-
+/*
+ * How fast does the clock tick (if present), or how many times a second do
+ * we simulate if not. For a machine without video 10 is a good number. If
+ * you have video you probably want whatever vertical sync/blank interrupt
+ * rate the machine has. For many systems it's whatever the hardware gives
+ * you.
+ *
+ * Note that this needs to be divisible by 10 and at least 10. If your clock
+ * is a bit slower you may need to fudge things somewhat so that the kernel
+ * gets 10 timer interrupt calls per second.
+ */
+#define TICKSPERSEC 50	 /* PAL = 50, NTSC = 60 */
 
 #define plt_copyright()
-
-/* Size for a slightly bigger setup than the little 8bit boxes */
-#define PTABSIZE	32
-#define OFTSIZE		30
-#define ITABSIZE	50
-#define UFTSIZE		16

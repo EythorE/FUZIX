@@ -39,8 +39,8 @@ readKey:
 	cmp #0, %d0
 	beq keyboardSuccess
 
-	# failure
-	move.l #0, %d0
+	# failure; may be spurious data in top two bytes 
+	clr.l %d0
 	rts
 
 keyboardSuccess:

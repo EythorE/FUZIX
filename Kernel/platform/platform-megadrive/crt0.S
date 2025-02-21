@@ -6,6 +6,7 @@
 	.globl start
 	.globl  cpu_type
 
+
 .section .rom_header, "ax", @progbits
 #==============================================================
 # CPU VECTOR TABLE
@@ -25,46 +26,46 @@
 	.long   e_trapv					| TRAPV CPU_Exception
 
 	.long   e_priv					| Privilege violation
-	.long   e_trace				| TRACE exception
+	.long   e_trace					| TRACE exception
 	.long   e_unimpa				| Line-A emulator
 	.long   e_unimpf				| Line-F emulator
 
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
 	.long   e_uninit				| Unused (reserved)
 
 	| 16-23 unused
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
 
 	| 24
 	.long   e_spurious				| Spurious exception
-	.long   interrupt				| IRQ level 1
-	.long   e_unexpected				| IRQ level 2
-	.long   e_unexpected				| IRQ level 3
-	.long   INT_HInterrupt		| IRQ level 4 (horizontal retrace interrupt)
+	.long   e_unexpected			| IRQ level 1
+	.long   e_unexpected			| IRQ level 2
+	.long   e_unexpected			| IRQ level 3
+	.long   INT_HInterrupt			| IRQ level 4 (horizontal retrace interrupt)
 	.long   e_unexpected  			| IRQ level 5
-	.long   INT_VInterrupt		| IRQ level 6 (vertical retrace interrupt)
-	.long   e_unexpected				| IRQ level 7
+	.long   INT_VInterrupt			| IRQ level 6 (vertical retrace interrupt)
+	.long   e_unexpected			| IRQ level 7
 
 	| 32 - TRAP #n
-	.long   e_trap0				| TRAP #00 exception
-	.long   e_trap1				| TRAP #01 exception
-	.long   e_trap2				| TRAP #02 exception
-	.long   e_trap3				| TRAP #03 exception
-	.long   e_trap4				| TRAP #04 exception
-	.long   e_trap5				| TRAP #05 exception
-	.long   e_trap6				| TRAP #06 exception
-	.long   e_trap7				| TRAP #07 exception
-	.long   e_trap8				| TRAP #08 exception
-	.long   e_trap9				| TRAP #09 exception
+	.long   e_trap0					| TRAP #00 exception
+	.long   e_trap1					| TRAP #01 exception
+	.long   e_trap2					| TRAP #02 exception
+	.long   e_trap3					| TRAP #03 exception
+	.long   e_trap4					| TRAP #04 exception
+	.long   e_trap5					| TRAP #05 exception
+	.long   e_trap6					| TRAP #06 exception
+	.long   e_trap7					| TRAP #07 exception
+	.long   e_trap8					| TRAP #08 exception
+	.long   e_trap9					| TRAP #09 exception
 	.long   e_trap10				| TRAP #10 exception
 	.long   e_trap11				| TRAP #11 exception
 	.long   e_trap12				| TRAP #12 exception System call
@@ -73,22 +74,22 @@
 	.long   e_trap15				| TRAP #15 exception
 
 	| unused
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
-	.long   e_unexpected				| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
+	.long   e_unexpected			| Unused (reserved)
 	
 #==============================================================
 # SEGA MEGA DRIVE ROM HEADER
@@ -131,38 +132,6 @@
 
 
     .section .text
-    .globl CPU_EntryPoint, INT_VInterrupt, INT_HInterrupt, _plt_interrupt
-#==============================================================
-# INTERRUPT ROUTINES
-#==============================================================
-# The interrupt routines, as specified in the vector table in
-# the rom_header.
-# Note that we use RTE to return from an interrupt, not
-# RTS like a subroutine.
-#==============================================================
-
-# Vertical interrupt - run once per frame
-INT_VInterrupt:
-    movem.l %d0-%d7/%a0-%a6,-(%sp)    | Save registers
-    jsr     plt_interrupt             | Call C handler
-    movem.l (%sp)+,%d0-%d7/%a0-%a6    | Restore registers
-	rte
-
-# Horizontal interrupt - run once per N scanlines (N = specified in VDP register $A)
-INT_HInterrupt:
-	rte
-
-# # Exception interrupt - called if an error has occured
-# CPU_Exception:
-#	# Just halt the CPU if an error occurred. Later on, we may want to write
-#	# an exception handler to draw the current state of the machine to screen
-#	# (registers, stack, error type, etc) to help debug the problem.
-#	stop   #0x2700
-#	rte
-
-#==============================================================
-# Initialise the Mega Drive
-#==============================================================
 
 CPU_EntryPoint:
 #==============================================================
@@ -171,12 +140,12 @@ CPU_EntryPoint:
 	#=======================================================
 	# Write the TMSS signature (if a model 1+ Mega Drive)
 	#=======================================================
-	jsr    VDP_WriteTMSS
+	jsr VDP_WriteTMSS
 
 	#=======================================================
 	# Load the initial VDP registers
 	#=======================================================
-	jsr    VDP_LoadRegisters
+	jsr VDP_LoadRegisters
 
 	#=======================================================
 	# Clear random data from VRAM

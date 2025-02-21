@@ -26,7 +26,6 @@ void memzero(void *p, usize_t len)
 	memset(p, 0, len);
 }
 
-extern void clear_across(int8_t y, int8_t x, int16_t num);
 void pagemap_init(void)
 {
     /* Linker provided symbols for RAM boundaries */

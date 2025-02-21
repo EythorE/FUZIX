@@ -10,7 +10,6 @@
 
 vscroll_amount:
     .word 0                              | Keep track of how much we scrolled
-    
 
     .globl do_beep, cursor_disable, cursor_off, cursor_on
     .globl clear_across, clear_lines, scroll_up, scroll_down, plot_char
