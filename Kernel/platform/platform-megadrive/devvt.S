@@ -5,10 +5,10 @@
 .equ vdp_cmd_vsram_write, 0x40000010    | Vertical Scroll RAM address
 .equ vram_addr_plane_a, 0xC000
 
-    .globl vscroll_amount
+    .globl scroll_amount
    .section .data
 
-vscroll_amount:
+scroll_amount:
     .word 0                              | Keep track of how much we scrolled
 
     .globl do_beep, cursor_disable, cursor_off, cursor_on
@@ -44,20 +44,18 @@ clear_across:
 
     # y to d0
     clr.l %d0
-    move.w (vscroll_amount), %d0 | Need this to map y to vdp coordinates
+    move.w (scroll_amount), %d0 | Need this to map y to vdp coordinates
     lsr.w   #3, %d0              | B // 8
     add.w 6(%sp),%d0             | y + scroll_up
     and.w #0x1F, %d0             | Modulo 32 (rows in VRAM)
     # d0 contains the y row
 
-    rol.l #8, %d0
-    rol.l #8, %d0
+    swap %d0
     rol.l #7, %d0
     add.l %d0, %d1
 
     move.b 11(%sp), %d0
-    rol.l #8, %d0
-    rol.l #8, %d0
+    swap %d0
     rol.l #1, %d0
     add.l %d0, %d1
 
@@ -82,7 +80,7 @@ clear_lines:
 
     # y to d0
     clr.l %d0
-    move.w (vscroll_amount), %d0 | Need this to map y to vdp coordinates
+    move.w (scroll_amount), %d0 | Need this to map y to vdp coordinates
     lsr.w   #3, %d0              | B // 8
     add.w 6(%sp),%d0             | y + scroll_up
     and.w #0x1F, %d0             | Modulo 32 (rows in VRAM)
@@ -124,9 +122,9 @@ _clrl_loop:
 # void scroll_up(void)
 # Normal scroll, the bottom line does not need to be cleared.
 scroll_up:
-    move.w (vscroll_amount), %d0
+    move.w (scroll_amount), %d0
     add.w #8, %d0                         | Scroll single line (8 pixels)
-    move.w %d0, (vscroll_amount)
+    move.w %d0, (scroll_amount)
 
     # Write Plane A's V-scroll value to vertical scroll memory (VSRAM)
 	#   Plane A's vertical page scroll value is at VSRAM $0000,Plane B's is at $0002.
@@ -138,9 +136,9 @@ scroll_up:
 # void scroll_down(void)
 # Reverse scroll, the top line does not need to be cleared.
 scroll_down:
-    move.w (vscroll_amount), %d0
+    move.w (scroll_amount), %d0
     sub.w #8, %d0                         | Scroll single line (8 pixels)
-    move.w %d0, (vscroll_amount)
+    move.w %d0, (scroll_amount)
     move.l #vdp_cmd_vsram_write, VDP_CONTROL
     move.w %d0, (VDP_DATA)
     rts
@@ -153,21 +151,19 @@ scroll_down:
 plot_char:
     # y to d0
     clr.l %d0
-    move.w (vscroll_amount), %d0 | map y to vdp coordinates
+    move.w (scroll_amount), %d0 | map y to vdp coordinates
     lsr.w   #3, %d0              | B // 8
     add.w 6(%sp),%d0             | y + scroll_up
     and.w #0x1F, %d0             | Modulo 32 (rows in VRAM)
     # d0 contains the y row
 
     move.l #0x40000003, %d1
-    rol.l #8, %d0
-    rol.l #8, %d0
+    swap %d0
     rol.l #7, %d0
     add.l %d0, %d1
 
     move.b 11(%sp), %d0 | x
-    rol.l #8, %d0
-    rol.l #8, %d0
+    swap %d0
     rol.l #1, %d0
     add.l %d0, %d1
 

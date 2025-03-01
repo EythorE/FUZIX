@@ -18,7 +18,7 @@ nextFont:
 	move.b	(%a1)+, %d0  | load the first byte of the font
 	clr.l %d1           | we will have to convert bits to bytes (%xxxxxxx to $xxxxxxxx)
 
-	# rol the first bit into d1
+	# rol the first bit into d1, through the extend bit
 	roxl.b	#1, %d0
 	roxl.L	#1, %d1
 
@@ -26,10 +26,13 @@ nextFont:
 	move.l  #6, %d3     | do that 7 time (-1 for dbra)
 	bra rolin
 rolin:
-	rol.L   #3, %d1     | have to move the bit 3 places left 1000 then rol a new bit in 0001 0001
-	roxl.B	#1, %d0
-	roxl.L	#1, %d1
+	rol.l   #3, %d1     | have to move the bit 3 places left 1000 then rol a new bit in 0001 0001
+	roxl.b	#1, %d0
+	roxl.l	#1, %d1
 	dbra    %d3, rolin
+
+	# add 1 to each nibble for the backroud to be non transparent
+	add.l #0x11111111,%d1
 
 	move.l	%d1, (VDP_DATA)	| write long to VDP
 	dbra	%d2, nextFont		| loop until done

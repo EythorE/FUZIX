@@ -29,18 +29,46 @@ void memzero(void *p, usize_t len)
 void pagemap_init(void)
 {
     /* Linker provided symbols for RAM boundaries */
-    extern uint32_t _ram_start;
-    extern uint32_t _ram_end;
+	/* TODO: create a discard area at the end of the image and start
+	   there */
+    // extern uint32_t _ram_start;
     extern uint32_t _bss_end;
+    extern uint32_t _ram_end;
 
     kprintf("Motorola 680%s%d processor detected.\n",
         sysinfo.cpu[1]?"":"0", sysinfo.cpu[1]);
 
-    uint32_t free_ram_start = (uint32_t)&_bss_end;
+    uint32_t free_ram_start = (uint32_t)(&_bss_end + 511) & ~511;
     uint32_t ram_end = (uint32_t)&_ram_end;
+    uint32_t ram_size = ram_end - free_ram_start;
+    kmemaddblk((void *)free_ram_start, ram_size);
+    kprintf("RAM: %dKB (%lx-%lx)\n", ram_size/1024, free_ram_start, ram_end);
 
-    kmemaddblk((void *)free_ram_start, ram_end - free_ram_start);
-    kprintf("RAM: %dKB (%lx-%lx)\n", (ram_end - free_ram_start)/1024, free_ram_start, ram_end);
+    // uint32_t block_size = (ram_size/3) & ~511;
+    // uint32_t block1_start = free_ram_start;
+    // uint32_t block2_start = block1_start + block_size;
+    // uint32_t block3_start = block2_start + block_size;
+    // kmemaddblk((void *)block1_start, block_size);
+    // kmemaddblk((void *)block2_start, block_size);
+    // kmemaddblk((void *)block3_start, block_size);
+
+    // uint32_t free_ram = ram_end - free_ram_start;
+    // uint32_t ram_half = (free_ram / 2) & ~511;
+    // uint32_t block_2 = free_ram_start+ram_half;
+    // kmemaddblk((void *)free_ram_start, ram_end - free_ram_start);
+
+    // I split the memory in two, debugging; there is somethingwrong with memory management or executable relocations
+    // There seems to be a problem where the 2nd to third app loadeed in userspace does not load properly
+    // kmemaddblk((void *)free_ram_start, ram_size);
+    // kprintf("RAM: %dKB (%lx-%lx)\n", ram_size/1024, free_ram_start, ram_end);
+
+    // I can skip this or the one above but not the small space below
+    // kmemaddblk((void *)block_2, ram_half);
+    // kprintf("RAM: %dKB (%lx-%lx)\n", ram_half/1024, block_2, ram_end);
+
+    // only works if I include this memory space???
+    kmemaddblk((void *)0xFF0000, 0x10000);
+    // kprintf("RAM: %dKB (%lx-%lx)\n", 0x10000/1024, 0xFF0000, 0x10000);
 }
 
 // see mm/flat.c

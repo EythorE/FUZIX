@@ -4,8 +4,8 @@ FUZIX_ROOT=../../../..
 export USERCPU FUZIX_ROOT
 include $(FUZIX_ROOT)/Target/rules.$(USERCPU)
 
-SRCSNS = tapp.c
-SRCS  = 
+SRCSNS = # tapp.c
+SRCS  = tapp.c
 SRCTC = 
 
 OBJS = $(SRCS:.c=.o)

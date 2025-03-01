@@ -1,4 +1,4 @@
-// #define DEBUG
+#define DEBUG
 // #define DEBUG_MEMORY
 // #define DEBUG_SLEEP
 // #define DEBUG_SYSCALL
@@ -11,9 +11,12 @@
 #undef CONFIG_PROFIL
 
 
-// /* ROM ramdisk definitions */
+
+#define BOOTDEVICE 1            /* 0 is the rom disk, 1 is the ram disk */
+
+/* ROM ramdisk definitions */
 #define BLKSHIFT 9                 /* 512 byte blocks */
-#define DEV_RD_ROM_PAGES 3968     /* size of the ROM disk (/dev/rd0) in 512B pages */
+#define DEV_RD_ROM_PAGES 3968      /* size of the ROM disk (/dev/rd0) in 512B pages */
 #define DEV_RD_RAM_PAGES 3072      /* size of the RAM disk (/dev/rd1) in 512B pages */
 
 #define DEV_RD_ROM_START ((uint32_t)0x010000)
@@ -21,11 +24,17 @@
 #define DEV_RD_ROM_SIZE  ((uint32_t)DEV_RD_ROM_PAGES << BLKSHIFT)
 #define DEV_RD_RAM_SIZE  ((uint32_t)DEV_RD_RAM_PAGES << BLKSHIFT)
 
+
 #define CONFIG_VT
 #define VT_WIDTH	40
 #define VT_HEIGHT	28
 #define VT_RIGHT	39
 #define VT_BOTTOM	27
+
+/* Basic TTY defines needed by kernel */
+#define NUM_DEV_TTY 1     /* Minimum needed */
+#define TTYDEV   513      /* Default TTY device */
+#define BOOT_TTY 513      /* Set this to default device for stdio, stderr */
 
 
 /* Size for a slightly bigger setup than the little 8bit boxes */
@@ -34,53 +43,51 @@
 #define ITABSIZE	50
 #define UFTSIZE		16
 
-// #define TICKSPERSEC 300   /* Ticks per second */
-// #define PROGBASE    0x0000  /* also data base */
-// #define PROGLOAD    0x0100  /* also data base */
-// #define PROGTOP     0xC000  /* Top of program, below C000 for simplicity
-//                                to get going */
-
-
-/* Basic TTY defines needed by kernel */
-#define NUM_DEV_TTY 1      /* Minimum needed */
-#define TTYDEV   513      /* Default TTY device */
 
 /* Basic device defines needed by kernel */
-#define NBUFS    4        /* Number of buffers */
-#define NMOUNTS  2        /* Number of mounts */
-#define BOOT_TTY 513        /* Set this to default device for stdio, stderr */
-
-#define CONFIG_SPLIT_UDATA	/* Adjacent addresses but different bank! */
-#define UDATA_SIZE	1024
-#define UDATA_BLKS	2
-#define MAX_SWAPS   0	    	/* We will size if from the partition */
-
-#define BOOTDEVICE 1            /* 1 is the rom disk, 2 is the ram disk */
-
-/* We need a tidier way to do this from the loader */
-#define CMDLINE	NULL	  /* Location of root dev name */
-
-
-#define CONFIG_SYSCLK	7670000    /* 7.67MHz */
-
-
-#undef CONFIG_MULTI
-#undef CONFIG_SPLIT_ID
-#undef CONFIG_SPLIT_UDATA
-
-/* This is important for some reason*/
-#define CONFIG_SPLIT_ID
-#define CONFIG_PARENT_FIRST
-
-/* Not meaningful but we currently chunk to 512 bytes */
-#define CONFIG_BANKS 	(65536/512)
+#define NBUFS       20        /* Increase from 4 to 20 */
+#define NMOUNTS     2        /* Increase from 2 to 4 */
 
 
 #define CONFIG_FLAT
 #define CONFIG_32BIT
 #define CONFIG_LEVEL_2
+#define CONFIG_MULTI
+#define UDATA_SIZE	1024
+
+/* no swap */
+#undef CONFIG_SPLIT_UDATA
+#undef UDATA_BLKS
+#undef MAX_SWAPS
 
 
+// When CONFIG_SPLIT_ID is defined, the memory manager separates code (text) and data into different memory blocks. This creates a memory layout where:
+// block 0: Code R/O
+// block 1: Data
+// block 3+: memallocs()
+// Kernel/mm/flat.c
+/* On a system where we can split code from data the code
+    ends up shared across fork and we occupy two memory blocks
+    independently allocated. On a system where we can't we
+    allocate a single block for everything and the database is
+    just offset */
+// i.e. when forking code is not copied when CONFIG_SPLIT_ID is defined.
+// when we dont split instruction data, we do run into bus errors, potentially
+// word mis-aligned instruction
+// Split Instruction/Data:
+#define CONFIG_SPLIT_ID
+
+#define CONFIG_PARENT_FIRST /* required; see dofork in Kernel/lib/68000flat.S */
+
+
+
+/* We need a tidier way to do this from the loader */
+#define CMDLINE	NULL	  /* Location of root dev name */
+
+/* no banking */
+#define CONFIG_BANKS 	0
+
+#define CONFIG_SYSCLK	7670000    /* 7.67MHz */
 
 /*
  * How fast does the clock tick (if present), or how many times a second do

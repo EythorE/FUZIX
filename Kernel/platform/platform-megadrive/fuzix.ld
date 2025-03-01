@@ -6,7 +6,7 @@ MEMORY
     rom_disk : ORIGIN = 0x010000, LENGTH = 0x1F0000  /* 1.9MB Cartridge ROM disk */
     ram_disk : ORIGIN = 0x200000, LENGTH = 0x180000  /* 1.5 MB Cartridge RAM disk */
     ram (rw) : ORIGIN = 0x380000, LENGTH = 0x080000  /* 512KB Cartridge RAM */
-    udata (rw) : ORIGIN = 0xFF0000, LENGTH = 0x10000 /* 64KB RAM (not used, except temporarilly for the stack)*/
+   /* udata (rw) : ORIGIN = 0xFF0000, LENGTH = 0x10000 */ /* 64KB RAM (not used, except temporarilly for the stack)*/
 }
 
 PROVIDE(_rom_start = ORIGIN(rom));

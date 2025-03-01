@@ -7,6 +7,7 @@
 # 12 nibbles stored in the lower nibble of the bytes (the more significant nibble is $0)
 scancode_buffer: .space 12 
 shift_is_down: .space 1  | keep track of if shift is held down
+ctrl_is_down: .space 1  | keep track of if ctrl is held down
 
     .section .text
     .globl initKeyboard, ReadKeyboard, readKey
@@ -66,11 +67,23 @@ keyboardSuccess:
 	cmp.b #0x59, %d5     | right_shift
 	beq set_shift
 
-	bra not_shift
+	# ctrl
+	cmp.b #0x14, %d5     | left_ctrl
+	beq set_ctrl
+	cmp.b #0x18, %d5     | right_ctrl
+	beq set_ctrl
+
+	bra not_ctrlkey
+
 set_shift:
 	move.b %d4, (shift_is_down)  | store it in address shift_is_down
 	rts
-not_shift:
+
+set_ctrl:
+	move.b %d4, (ctrl_is_down)  | store it in address ctrl_is_down
+	rts
+
+not_ctrlkey:
 	cmp.b #0, %d4  | test if make bit is set
 	bne _keyMake   | branch if make bit is set
 	rts            | else return
@@ -81,8 +94,15 @@ _keyMake:
 	beq shiftUp
 	add #0x0100, %a4
 shiftUp:
+
     # the character we want is offset by the value of %d5 (ascii)
 	move.b (%a4, %d5), %d0  | move the ascii to %d0
+	
+	# see tty.h, we and 0x1F to the character
+	cmp.b #0, ctrl_is_down
+	beq ctrlUp
+	and.b #0x1F, %d0
+ctrlUp:
 	rts
 
 # Routine for reading a keyboard packet

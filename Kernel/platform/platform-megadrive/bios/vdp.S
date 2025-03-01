@@ -56,7 +56,7 @@ ClrVramLp:                    | Start of loop
 VDP_writePallete:
     move.l #vdp_cmd_cram_write, VDP_CONTROL  | set_cram_write $0000
     lea Palette, %a0
-    move.w #15, %d0     | 8 words in palette (8*2 -1 for DBRA loop)
+    move.w #31, %d0     | 8 words in palette (8*2 -1 for DBRA loop)
 PalLp:
     move.w (%a0)+, VDP_DATA
     dbra %d0, PalLp
@@ -160,10 +160,28 @@ VDPRegisters:
 #==============================================================
 Palette:
     .word 0x0000  | Colour 0 = Transparent
-    .word 0x0EEE  | Colour 1 = White
     .word 0x0000  | Colour 2 = Black
+    .word 0x0EEE  | Colour 1 = White
     .word 0x000E  | Colour 3 = Red
     .word 0x00E0  | Colour 4 = Blue
+    .word 0x0E00  | Colour 5 = Green
+    .word 0x0E0E  | Colour 6 = Pink
+    .word 0x0000  | Leave the rest black...
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+
+Palette1:
+    .word 0x00E0  | Colour 4 = Blue
+    .word 0x0EEE  | Colour 1 = White
+    .word 0x000E  | Colour 3 = Red
+    .word 0x0000  | Colour 2 = Black
+    .word 0x0000  | Colour 0 = Transparent
     .word 0x0E00  | Colour 5 = Green
     .word 0x0E0E  | Colour 6 = Pink
     .word 0x0000  | Leave the rest black...

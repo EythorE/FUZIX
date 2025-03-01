@@ -173,6 +173,12 @@ CPU_EntryPoint:
 	#==============================================================
     jsr initKeyboard
 
+.section .data
+str_d:	.asciz "AHello, world!\n"
+	.even
+
+.section .text
+
 
 start:
 	jsr init_data
@@ -182,6 +188,7 @@ start:
 	bsr fuzix_main
 	or #0x0700,%sr
 stop:
+	jsr dbg_registers
 	bra stop
 
 cpu_type:
@@ -228,3 +235,4 @@ init_data:
 
 .Lbss_done:
         rts
+

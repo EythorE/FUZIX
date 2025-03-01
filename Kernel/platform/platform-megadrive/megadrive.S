@@ -45,7 +45,7 @@ plt_idle:
 
 init_hardware:
 	    move.w #512,ramsize
-	    move.w #256,procmem
+	    move.w #232,procmem
         rts
 
 
@@ -65,8 +65,8 @@ INT_HInterrupt:
 INT_VInterrupt:
 	; C will save and restore a2+/d2+,
 	; we can make sure to do the same, then we can movem.l a0-a1/a5/d0-d1,-(sp)
-    movem.l %d0-%d7/%a0-%a6,-(%sp)
-
+    
+	movem.l %d0/%d1/%d4/%d5/%a0/%a1/%a4,-(%sp)
 	; Read keyboard
 	jsr readKey ; trashes %d1,%d4,%d5 %a0,%a1,%a4
 	tst.b %d0
@@ -79,6 +79,7 @@ INT_VInterrupt:
     jsr tty_inproc
     addq.l #8,sp
 no_key:
+	movem.l (%sp)+,%d0/%d1/%d4/%d5/%a0/%a1/%a4
 
     ; jsr     timer_interrupt
     ;movem.l (%sp)+,%d0-%d7/%a0-%a6
@@ -89,7 +90,7 @@ no_key:
 ;interrupt: I need to understand what is going on here;
 ;
 	; C will save and restore a2+/d2+
-	; movem.l a0-a1/a5/d0-d1,-(sp)
+	movem.l a0-a1/a5/d0-d1,-(sp)
 	move.l udata_shadow,a5	; set up the register global
 	move.b #1,U_DATA__U_ININTERRUPT(a5)
 	jsr timer_interrupt
@@ -118,9 +119,10 @@ no_ready:
 no_preempt:
 	tst.b U_DATA__U_CURSIG(a5)
 	beq no_signal
+	; movem.l (%sp)+,%d0-%d7/%a0-%a6
 	;   FIXME: this is ugly
-	; movem.l (sp)+,a0-a1/a5/d0-d1
-	movem.l (%sp)+,%d0-%d7/%a0-%a6
+	movem.l (sp)+,a0-a1/a5/d0-d1
+	; This is creating trapdata *framedata for exception()
 	move.w sr,-(sp)
 	move.w #0,-(sp)
 	movem.l a0-a6/d0-d7,-(sp)
@@ -131,8 +133,8 @@ no_preempt:
 	addq #4,sp
 	rte
 no_signal:
-	;movem.l (sp)+,a0-a1/a5/d0-d1
-	movem.l (%sp)+,%d0-%d7/%a0-%a6
+	movem.l (sp)+,a0-a1/a5/d0-d1
+	; movem.l (%sp)+,%d0-%d7/%a0-%a6
 	rte
 
 ;
@@ -151,9 +153,9 @@ map_save:
 	rts
 
 
-; outchar: Print the char in d0
-outchar:
-outcharw:
-	; TODO
-	rts
-;
+# ; outchar: Print the char in d0
+# outchar:
+# outcharw:
+# 	; TODO
+# 	rts
+# ;

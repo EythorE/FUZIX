@@ -1,3 +1,6 @@
+debug with blastem:
+m68k-elf-gdb -q --tui -ex "target remote | blastem -D Images/megadrive/fuzix.rom"  Kernel/platform/platform-megadrive/fuzix.elf
+
 It seems syscalls from userspace are not handled correctly!
 
 We can use Standaloun ucp to browse and manipulate a filesystem

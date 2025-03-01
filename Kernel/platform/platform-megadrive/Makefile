@@ -42,8 +42,9 @@ tricks.S: ../../lib/68000flat.S
 clean:
 	rm -f bios/*.o *.o fuzix.elf loader.elf loader.map loader.bin core *~ 
 	rm -f fuzix.rom
+	(cd Applications; $(MAKE) clean)
 
-image: fuzix.ld $(AOBJS) $(BOBJS)  main.o devtty.o kernel.def
+image: fuzix.ld $(AOBJS) $(BOBJS)  main.o devtty.o kernel.def ../../cpu-68000/lowlevel-68000.o ../../flat.o
 	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(AOBJS) $(BOBJS) devrd.o main.o devtty.o \
 	../../vt.o ../../start.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
 	../../timer.o ../../kdata.o 68000exception.o devices.o \
