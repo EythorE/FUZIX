@@ -1,3 +1,5 @@
+F12 can debug the debug overlay on/off, provided by output.S
+
 debug with blastem:
 m68k-elf-gdb -q --tui -ex "target remote | blastem -D Images/megadrive/fuzix.rom"  Kernel/platform/platform-megadrive/fuzix.elf
 

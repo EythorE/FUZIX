@@ -1,3 +1,15 @@
+plt_relocate in 68000relocate.c is getting the same addresses as _ececve in syscall_exec32.c is reporting.
+We need to figure out a way to print udata for a program right before we jump to it.
+We know the addresses.
+I guess it's being relocated correctly.
+So most likely the udata is correct. but it may have stray or incorrect data in it.
+I guess the kernel is jumping (rte-ing) to the correct address.
+We need to figure out:
+Is the udata initialized correctly for programs that are failing.
+Is the memory copied correctly to the data and code sections.
+
+Note: it is hard to understand what is being compiled into the kernel, what is being compiled into user apps. And looking at the file structure; understanding what code and header files are for the kernel, init system and user apps.
+
 Try and understand how the program loading works
 
 udata
@@ -6,9 +18,8 @@ defined in ??
 
 udata_shadow contains
 
-The boot runs okey and programs work when using the mega drives internal ram as a block everything works as expected.
-
-When the extra ram is not used the thrid program that I run fails.
+The boot runs okey. Few programs work when using the mega drives internal ram.
+When the extra ram is not used the third program I run fails.
 
 There is something of about the memory mapping or the program loading.
 
@@ -16,6 +27,7 @@ There is something of about the memory mapping or the program loading.
 switchin is used to change running program, 
 
 return from exception is used to enter dynamically loaded user programs.
+-- this may be false -- it seems this rte is always going to the same address!!
 In Kernel/lib/68000flat.S forkreturn is used to rte to the user program.
 It contains on the stack 2 bytes for the status register then 4 bytes for the return address before calling rte.
 

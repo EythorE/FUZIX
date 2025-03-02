@@ -28,6 +28,8 @@
 .equ debug_window_size, 20 | rows
 
     .section .data
+dbg_plane_enabled:
+	.byte 1
 cursor_x:
     .byte 0
 cursor_y:
@@ -37,11 +39,30 @@ scrolling:
     .even
 vscroll_amount:
     .word 0                              | Keep track of how much we scrolled
+	
 
 
     .section .text
     .globl printString, printStringA0, printChar, printLong, printWord, printByte, clearLine, outchar, newline
-    .globl outchar,dbg_registers,dbg_memory
+    .globl outchar,dbg_registers,dbg_memory,dbg_stack,dbg_toggle
+
+dbg_toggle:
+	# we write to register i by writing bytes register,value to the vdp control port
+	# with the top bit set, so 0x84 for 0x04
+	# register 0x04 is Plane B Name Table Location.
+	# we write 0x00 to it to dissable it, and 0x07 to enable (0xE000) is our b plane name table)
+	tst.b   dbg_plane_enabled
+    	beq     dbg_enable
+    
+	| Disable
+	move.w  #0x8400,(VDP_CONTROL)
+	move.b  #0,dbg_plane_enabled 
+	rts
+dbg_enable:
+	move.w  #0x8407,(VDP_CONTROL)
+	move.b  #1,dbg_plane_enabled
+    	rts
+
 
 #==============================================================
 # Print zero-terminated string at %a0
@@ -282,7 +303,16 @@ showNextReg:
     movem.l (%sp)+,%d0-%d7/%a0-%a7
     rts
 
-
+# outputs the stack, excluding the return address of this call
+# these functions are all really inefficient, but that matters in no way what so ever
+dbg_stack:
+	movem.l %d0/%a0,-(%sp)
+	# the stack we want to see is 3 longs down the stack
+	lea 12(%sp),%a0 | 2 longs I pushed, and the return address
+	move.l #4,%d0
+	jsr dbg_memory
+	movem.l (%sp)+,%d0/%a0
+	rts
 
 
 # Usage:

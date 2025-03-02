@@ -61,13 +61,24 @@ keyboardSuccess:
 	rol.b #4, %d5
 	or.b 9(%a1), %d5     | lower nibble of scancode
 
+
+    # debug toggle is F12
+    	tst.b %d4
+	beq not_f12 | not testing key break, only make
+    	cmp.b #0x07, %d5     | F12
+	bne not_f12
+	jsr dbg_toggle
+	move.l #0, %d0 | send failure (even if its not really)
+	rts
+
+not_f12:
     # shift
 	cmp.b #0x12, %d5     | left_shift
 	beq set_shift
 	cmp.b #0x59, %d5     | right_shift
 	beq set_shift
 
-	# ctrl
+    # ctrl
 	cmp.b #0x14, %d5     | left_ctrl
 	beq set_ctrl
 	cmp.b #0x18, %d5     | right_ctrl
