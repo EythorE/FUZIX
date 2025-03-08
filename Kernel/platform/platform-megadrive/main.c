@@ -1,4 +1,3 @@
-
 #include <kernel.h>
 #include <timer.h>
 #include <kdata.h>
@@ -75,8 +74,8 @@ void pagemap_init(void)
    set up at compile time */
 u_block udata_block[PTABSIZE];
 
-/* This will belong in the core 68K code once finalized */
 extern void dbg_udata();
+/* This will belong in the core 68K code once finalized */
 // This installs some header info into executables when they are initialized
 void install_vdso(void)
 {

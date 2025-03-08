@@ -5,6 +5,8 @@
 #include <tty.h>
 #include <devtty.h>
 #include <vt.h>
+#include <keycode.h>
+#include "keyboard.h"
 
 // vt
 uint8_t vtattr_cap = 0; /* TODO: colour */
@@ -79,12 +81,15 @@ void tty_setup(uint_fast8_t minor, uint_fast8_t flags)
 // {	
 // }
 
-// void tty_interrupt(void)
-// {
-//    kprintf("tty_interrupt\n");
-    // plt_interrupt();
-	// tty_poll(1, uart);
-// }
+extern void dbg_toggle();
+void tty_interrupt(void)
+{
+    uint8_t c = keyboard_read();
+    if (c == KEY_F12) {
+    	dbg_toggle();
+    }
+    tty_inproc(1, c);
+}
 
 // void plt_interrupt(void)
 // {

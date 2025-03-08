@@ -1,3 +1,16 @@
+ctags:
+```sh
+ctags --exclude="Applications/*" --exclude="Kernel/platform/platform-*" --exclude="Kernel/cpu-*" \
+      --languages=c,asm,make -R Kernel/
+ctags -a --languages=c,asm,make -R Kernel/platform/platform-megadrive/ Kernel/cpu-68000/
+```
+	; C will save and restore a2+/d2+,
+	; we can make sure to do the same in our asm routines,
+    ; then we can movem.l a0-a1/a5/d0-d1,-(sp)
+
+
+executables seem to work if I put them in rc, so there must be something wrong in platform (i/o) interrupt code?
+
 F12 can debug the debug overlay on/off, provided by output.S
 
 debug with blastem:
@@ -5,7 +18,7 @@ m68k-elf-gdb -q --tui -ex "target remote | blastem -D Images/megadrive/fuzix.rom
 
 It seems syscalls from userspace are not handled correctly!
 
-We can use Standaloun ucp to browse and manipulate a filesystem
+We can use Standalone ucp to browse and manipulate a filesystem
 ```Standalone/ucp Images/megadrive/filesystem2.img```
 Or for the byte-reversed .sram then use ucp -b
 
@@ -35,8 +48,8 @@ arguments are put on the stack in 4 byte bounderies.
 - [x] Check if backspace can be implemented; return ascii for backspace to tty
 - [x] Switch to fuzix based VT; I have a feeling that the old code was significantly less complex and faster.
 - [] Fuzix has an 8x8 font
-- [] ...and some keyboard handling
-- [] implement outchar for Kernel/cpu-68000/lowlevel-68000.S debug routines
+- [x] ...and some keyboard handling
+- [x] implement outchar for Kernel/cpu-68000/lowlevel-68000.S debug routines
 - [] add a suitable monitor which we can fall back to for debugging (plt_monitor)
 
 ## non-working apps
@@ -84,5 +97,3 @@ However, for Fuzix we are using
 
 > In the case of the Genesis, IRQ2 is assigned to the external interrupt, IRQ4 is assigned to the horizontal blank interrupt, and IRQ6 is assigned to the vertical blank interrupt. Setting the IPL bits to 3 basically just has external interrupt requests ignored, since it falls in range of IRQ1-3. You would wanna set the IPL bits to 0 or 1 if you wanna use external interrupts.
 <https://forums.sonicretro.org/index.php?threads/enabling-and-disabling-interrupts-the-why.42650/>
-
-

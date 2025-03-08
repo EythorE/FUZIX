@@ -86,7 +86,7 @@
 #define CMDLINE	NULL	  /* Location of root dev name */
 
 /* no banking */
-#define CONFIG_BANKS 	1
+#define CONFIG_BANKS 	0
 
 #define CONFIG_SYSCLK	7670000    /* 7.67MHz */
 

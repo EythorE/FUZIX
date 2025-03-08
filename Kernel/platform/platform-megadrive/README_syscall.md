@@ -1,4 +1,7 @@
 maybe something is off in mm?
+../../lib/68000flat.S
+../../flat.o 
+../../usermem.c
 
 
 apps are entered through doexec in lowlevel-68000.S, the program is loaded correctly and the kernel is rte-ing to the correct place in user program.

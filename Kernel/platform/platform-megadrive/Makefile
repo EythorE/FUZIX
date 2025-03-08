@@ -1,10 +1,10 @@
-CSRCS = devtty.c devices.c libc.c main.c devrd.c dbg.c
+CSRCS = devtty.c devices.c libc.c main.c devrd.c dbg.c keyboard.c
 COBJS = $(CSRCS:.c=$(BINEXT))
 
 BSRC = $(wildcard bios/*.S)
 BOBJS = $(patsubst bios/%.S,%.o, $(BSRC))
 
-ASRCS = crt0.S tricks.S megadrive.S devvt.S
+ASRCS = crt0.S tricks.S megadrive.S devvt.S keyboard_read.S
 AOBJS = $(ASRCS:.S=.o)
 
 # DSRCS = ../../dev/devrd.c
@@ -55,7 +55,8 @@ clean:
 	(cd Applications; $(MAKE) clean)
 
 image: fuzix.ld $(AOBJS) $(BOBJS)  main.o devtty.o kernel.def ../../cpu-68000/lowlevel-68000.o ../../flat.o
-	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(AOBJS) $(BOBJS) devrd.o main.o devtty.o dbg.o \
+	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(AOBJS) $(BOBJS) \
+	keyboard.o devrd.o main.o devtty.o dbg.o \
 	../../vt.o ../../start.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
 	../../timer.o ../../kdata.o 68000exception.o devices.o \
 	../../devio.o ../../filesys.o ../../process.o ../../inode.o ../../syscall_fs.o \

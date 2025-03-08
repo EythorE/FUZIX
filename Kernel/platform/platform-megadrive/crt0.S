@@ -171,7 +171,7 @@ CPU_EntryPoint:
 	#==============================================================
 	# Init keyboard communication
 	#==============================================================
-	jsr initKeyboard
+	jsr keyboard_init
 	
 
 
