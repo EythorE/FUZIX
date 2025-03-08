@@ -43,8 +43,8 @@ vscroll_amount:
 
 
     .section .text
-    .globl printString, printStringA0, printChar, printLong, printWord, printByte, clearLine, outchar, newline
-    .globl outchar,dbg_registers,dbg_memory,dbg_stack,dbg_toggle
+    .globl printString, printStringA0, printChar, printLong, printWord, printByte, clearLine, newline
+    .globl outchar,dbg_registers,dbg_memory,dbg_stack,dbg_toggle,dbg_rte,dbg_printf
 
 dbg_toggle:
 	# we write to register i by writing bytes register,value to the vdp control port
@@ -62,6 +62,85 @@ dbg_enable:
 	move.w  #0x8407,(VDP_CONTROL)
 	move.b  #1,dbg_plane_enabled
     	rts
+
+
+#==============================================================
+# dbg_printf function - supports %b, %w, %l, %s
+# void dbg_printf(char *s, ...);
+#
+# Arguments are passed on the stack in 4-byte boundaries
+# Format string is at 4(%sp)
+# Additional arguments start at 8(%sp)
+#==============================================================
+dbg_printf:
+    movem.l %d0-%d1/%a0-%a1, -(%sp)   | Save registers we'll use
+    
+    move.l  20(%sp), %a0              | Load format string address (4 + 16 from saved regs)
+    lea     24(%sp), %a1              | Pointer to first argument (8 + 16 from saved regs)
+    
+    # Main parsing loop
+dprintf_loop:
+    move.b  (%a0)+, %d0               | Get next character from format string
+    beq     dprintf_done              | If null terminator, we're done
+    
+    cmp.b   #'%', %d0                 | Check if it's a format specifier
+    bne     dprintf_regular           | If not, print as regular character
+    
+    # Handle format specifier
+    move.b  (%a0)+, %d0               | Get character after %
+    beq     dprintf_done              | If end of string, exit
+    
+    # Check which format specifier
+    cmp.b   #'b', %d0                 | Byte?
+    beq     dprintf_byte
+    
+    cmp.b   #'w', %d0                 | Word?
+    beq     dprintf_word
+    
+    cmp.b   #'l', %d0                 | Long?
+    beq     dprintf_long
+    
+    cmp.b   #'s', %d0                 | String?
+    beq     dprintf_string
+    
+    # If it's an unrecognized format, just print the % and the character
+    move.b  #'%', %d0
+    jsr     printChar
+    move.b  -1(%a0), %d0
+    jsr     printChar
+    bra     dprintf_loop
+    
+dprintf_regular:
+    jsr     printChar                 | Print regular character
+    bra     dprintf_loop
+    
+dprintf_byte:
+    move.l  (%a1)+, %d0
+    jsr     printByte
+    bra     dprintf_loop
+    
+dprintf_word:
+    move.l  (%a1)+, %d0
+    jsr     printWord
+    bra     dprintf_loop
+    
+dprintf_long:
+    move.l  (%a1)+, %d0               | Get next argument
+    jsr     printLong
+    bra     dprintf_loop
+    
+dprintf_string:
+    movem.l %a0, -(%sp)               | Save format string pointer
+    move.l  (%a1)+, -(%sp)            | Push string pointer as argument
+    jsr     printString               | Call printString
+    addq.l  #4, %sp                   | Clean up stack (argument)
+    movem.l (%sp)+, %a0               | Restore format string pointer
+    bra     dprintf_loop
+    
+dprintf_done:
+    movem.l (%sp)+, %d0-%d1/%a0-%a1   | Restore registers
+    rts
+
 
 
 #==============================================================
@@ -91,12 +170,12 @@ printLong:
     swap %d0
 printWord:
     rol.w   #8, %d0
-    jsr     printByte       | Output it in hex format.
+    bsr     printByte       | Output it in hex format.
     rol.w   #8, %d0
 printByte:
     move.b  %d0, %d1        | Save A for LSD.
     lsr.b   #4 ,%d0         | MSD to LSD position.
-    jsr     .LprintHex      | Output hex digit.
+    bsr     .LprintHex      | Output hex digit.
     move.b  %d1, %d0        | Restore A.
 .LprintHex:
     and.b   #0x0F, %d0      | Mask LSD for hex print.
@@ -105,14 +184,7 @@ printByte:
     ble     printChar       | Yes, output it.
     add.b   #0x07, %d0      | Add offset for letter.
     # bra printChar
-# fuzix kernel method
-# void plot_char(int8_t y, int8_t x, uint16_t c) # Currently c is in the range 0-255
-# plot_char:
-#     move.b 7(%sp), (cursor_y)
-#     move.b 11(%sp), (cursor_x)
-#     clr.l %d0
-#     move.b 15(%sp), %d0
-#     and.l #0xFF, %d0
+
 
 outchar:
 printChar:
@@ -189,40 +261,6 @@ newline:
     bra _newline
 
 
-#==============================================================
-# Clear the current line | bit long and old
-#==============================================================
-# clearLine:
-#     move.b #0, (cursor_x)
-#     movem.l %d1/%d2/%d3, -(%sp)
-#     clr.l %d1
-#     move.b cursor_y, %d1
-#     lsl.w #7, %d1                         | Multiply y by 128 (shift left 7 bits)
-#     or.w #vram_addr_plane, %d1            | add.l #vram_addr_plane, %d1
-
-#     # Prepare VDP command
-#     move.l %d1, %d2
-
-# 	lsr.l #7, %d2
-# 	lsr.l #7, %d2                           | Get bits A15-A14 into lowest bits
-
-# 	lsl.l #7, %d1
-# 	lsl.l #7, %d1
-# 	lsl.l #2, %d1                        | Move bits A13-A0 to bits 29-16
-
-#     and.l #0x3FFF0000, %d1                | Keep only bits 29-16
-#     or.l %d2, %d1                         | Combine
-#     or.l #vdp_cmd_vram_write, %d1         | Set bit 30, CD0=1 (write)
-#     move.l %d1, (VDP_CONTROL)
-
-#     # Clear the line by writing zeros
-#     moveq #19, %d1                        | Iterator from 19 down to -1
-# _clearChar:
-#     move.l #0, (VDP_DATA)                 | 0 is the empty tile
-#     dbra %d1, _clearChar
-#     movem.l (%sp)+, %d1/%d2/%d3
-#     rts
-
 
 clearLine:
     movem.l %d0/%d1/%d4/%d5, -(%sp)
@@ -245,6 +283,7 @@ _clearChar:
     dbra %d1, _clearChar
     movem.l (%sp)+, %d0/%d1/%d4/%d5
     rts
+
 
 
 # https://www.chibiakumas.com/68000/
@@ -312,6 +351,27 @@ dbg_stack:
 	move.l #4,%d0
 	jsr dbg_memory
 	movem.l (%sp)+,%d0/%a0
+	rts
+
+	.section .data
+_S1:	.asciz "RTE sr:"
+_S2:	.asciz " addr:"
+	.align 2
+	.section .text 
+
+
+dbg_rte:
+	movem.l %d0/%d1/%a0,-(%sp) | stack we want is 12+4(ret) bytes up
+	lea 	_S1, %a0
+	bsr 	printStringA0
+	move.w 16(%sp),%d0 | rte has a sr (word) ...
+	bsr printWord
+	lea 	_S2, %a0
+	bsr 	printStringA0
+	move.l 18(%sp),%d0 | ... and return address (long) on the stack
+	bsr printLong
+	bsr newline
+	movem.l (%sp)+,%d0/%d1/%a0
 	rts
 
 

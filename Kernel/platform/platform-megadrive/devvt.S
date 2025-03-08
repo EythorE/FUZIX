@@ -168,15 +168,17 @@ plot_char:
     add.l %d0, %d1
 
     move.l %d1, (VDP_CONTROL)
-    clr.l %d0
-    move.b 15(%sp), %d0   | The ascii we want to print
-    cmp.b #0x0A, %d0                      | Carriage return
-    beq _skipPrintChar
-    cmp.b #127, %d0                       | Is it higher than the highest printable character?
-    bgt _skipPrintChar
+    move.w 14(%sp), %d0   | The ascii we want to print
+    # cmp.b #0x0A, %d0                      | Carriage return
+    # beq _skipPrintChar
+    # cmp.b #127, %d0                       | Is it higher than the highest printable character?
+    # bgt _skipPrintChar
     sub.b #32, %d0
     bmi _skipPrintChar                    | Less than space
 
     move.w %d0, (VDP_DATA)
 _skipPrintChar:
+    clr.l %d0
+    move.l %d0,%d1
+
     rts

@@ -171,17 +171,15 @@ CPU_EntryPoint:
 	#==============================================================
 	# Init keyboard communication
 	#==============================================================
-    jsr initKeyboard
-
-.section .data
-str_d:	.asciz "AHello, world!\n"
-	.even
-
-.section .text
+	jsr initKeyboard
+	
 
 
 start:
 	jsr init_data
+#ifndef DEBUG
+	jsr dbg_toggle
+#endif
 	move.l udata_block_end,%sp
 	bsr init_early
 	bsr init_hardware

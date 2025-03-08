@@ -1,3 +1,8 @@
+maybe something is off in mm?
+
+
+apps are entered through doexec in lowlevel-68000.S, the program is loaded correctly and the kernel is rte-ing to the correct place in user program.
+
 plt_relocate in 68000relocate.c is getting the same addresses as _ececve in syscall_exec32.c is reporting.
 We need to figure out a way to print udata for a program right before we jump to it.
 We know the addresses.
@@ -44,7 +49,7 @@ I need to figure out what no_preempt is doing in the megadrive interrupt.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 I suspect that it is returning to the correct address.
-It always returns to the same address in userspace no matter the program (guessing config_multi is off in the config).
+It always returns to the same address in userspace no matter the program (guessing config_multi is off in the config) It's Not!.
 
 We can verify that the content in memory at the rte address is the same as the compiled binary. Need to find the start of the .data in the fuzix executable.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

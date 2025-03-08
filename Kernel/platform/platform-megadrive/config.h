@@ -1,4 +1,4 @@
-#define DEBUG
+// #define DEBUG
 // #define DEBUG_MEMORY
 // #define DEBUG_SLEEP
 // #define DEBUG_SYSCALL
@@ -45,14 +45,14 @@
 
 
 /* Basic device defines needed by kernel */
-#define NBUFS       20        /* Increase from 4 to 20 */
+#define NBUFS       16        /* Increase from 4 to 20 */
 #define NMOUNTS     2        /* Increase from 2 to 4 */
 
 
 #define CONFIG_FLAT
 #define CONFIG_32BIT
 #define CONFIG_LEVEL_2
-#define CONFIG_MULTI
+#undef CONFIG_MULTI
 #define UDATA_SIZE	1024
 
 /* no swap */
@@ -76,6 +76,7 @@
 // word mis-aligned instruction
 // Split Instruction/Data:
 #define CONFIG_SPLIT_ID
+#undef CONFIG_SPLIT_ID
 
 #define CONFIG_PARENT_FIRST /* required; see dofork in Kernel/lib/68000flat.S */
 
@@ -85,7 +86,7 @@
 #define CMDLINE	NULL	  /* Location of root dev name */
 
 /* no banking */
-#define CONFIG_BANKS 	0
+#define CONFIG_BANKS 	1
 
 #define CONFIG_SYSCLK	7670000    /* 7.67MHz */
 

@@ -25,7 +25,7 @@ plt_monitor:
 	jsr kprintf
 	addq.l #4,sp
 	move.w #$2700,sr
-	jmp start
+	# jmp start
 loop:
 	bra loop
 
@@ -62,24 +62,28 @@ INT_HInterrupt:
 	rte
 
 # Vertical interrupt - run once per frame Pal 50hz, NTSC 60hz
-INT_VInterrupt:
 	; C will save and restore a2+/d2+,
 	; we can make sure to do the same, then we can movem.l a0-a1/a5/d0-d1,-(sp)
-    
+
+tty_interrupt:
 	movem.l %d0/%d1/%d4/%d5/%a0/%a1/%a4,-(%sp)
+more_keys:
 	; Read keyboard
 	jsr readKey ; trashes %d1,%d4,%d5 %a0,%a1,%a4
 	tst.b %d0
 	beq no_key
+nocrnl:
 	; Push args for tty_inproc(1, k)
 	and.l #$FF,%d0
-    move.l %d0,-(sp)              ; Push k
-    moveq #1,%d0
-    move.l %d0,-(sp)              ; Push 1
-    jsr tty_inproc
-    addq.l #8,sp
+	move.l %d0,-(sp)              ; Push k
+	moveq #1,%d0
+	move.l %d0,-(sp)              ; Push 1
+	jsr tty_inproc
+	addq.l #8,sp
+	bra more_keys # check for more keys
 no_key:
 	movem.l (%sp)+,%d0/%d1/%d4/%d5/%a0/%a1/%a4
+	rts
 
     ; jsr     timer_interrupt
     ;movem.l (%sp)+,%d0-%d7/%a0-%a6
@@ -87,6 +91,7 @@ no_key:
 
 
 
+INT_VInterrupt:
 ;interrupt: I need to understand what is going on here;
 ;
 	; C will save and restore a2+/d2+
@@ -94,6 +99,7 @@ no_key:
 	move.l udata_shadow,a5	; set up the register global
 	move.b #1,U_DATA__U_ININTERRUPT(a5)
 	jsr timer_interrupt
+	jsr tty_interrupt 
 	clr.b U_DATA__U_ININTERRUPT(a5)
 
 	tst.b U_DATA__U_INSYS(a5)

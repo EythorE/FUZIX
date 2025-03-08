@@ -79,12 +79,12 @@ void tty_setup(uint_fast8_t minor, uint_fast8_t flags)
 // {	
 // }
 
-void tty_interrupt(void)
-{
-    kprintf("tty_interrupt\n");
+// void tty_interrupt(void)
+// {
+//    kprintf("tty_interrupt\n");
     // plt_interrupt();
 	// tty_poll(1, uart);
-}
+// }
 
 // void plt_interrupt(void)
 // {

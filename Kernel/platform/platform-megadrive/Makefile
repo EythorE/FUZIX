@@ -1,4 +1,4 @@
-CSRCS = devtty.c devices.c libc.c main.c devrd.c
+CSRCS = devtty.c devices.c libc.c main.c devrd.c dbg.c
 COBJS = $(CSRCS:.c=$(BINEXT))
 
 BSRC = $(wildcard bios/*.S)
@@ -39,13 +39,23 @@ $(LOBJS): %.o: ../../lib/%.c
 
 tricks.S: ../../lib/68000flat.S
 
+IMAGES = $(FUZIX_ROOT)/Images/$(TARGET)
+PKG2 = $(FUZIX_ROOT)/Kernel/platform/platform-megadrive/fuzix-platform-megadrive2.pkg
+
 clean:
+	rm -rf $(FUZIX_ROOT)/Library/libs/crt0_68000.s
+	rm -rf $(FUZIX_ROOT)/Library/libs/crt0nostdio_68000.s
+	rm -rf $(FUZIX_ROOT)/Library/libs/setjmp_68000.s
+	rm -rf $(FUZIX_ROOT)/Standalone/filesystem-src/etc-files/issue
+	rm -rf $(FUZIX_ROOT)/Applications/V7/cmd/sh/fshbuild_*
+	rm -rf $(IMAGES)
+
 	rm -f bios/*.o *.o fuzix.elf loader.elf loader.map loader.bin core *~ 
 	rm -f fuzix.rom
 	(cd Applications; $(MAKE) clean)
 
 image: fuzix.ld $(AOBJS) $(BOBJS)  main.o devtty.o kernel.def ../../cpu-68000/lowlevel-68000.o ../../flat.o
-	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(AOBJS) $(BOBJS) devrd.o main.o devtty.o \
+	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(AOBJS) $(BOBJS) devrd.o main.o devtty.o dbg.o \
 	../../vt.o ../../start.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
 	../../timer.o ../../kdata.o 68000exception.o devices.o \
 	../../devio.o ../../filesys.o ../../process.o ../../inode.o ../../syscall_fs.o \
@@ -58,8 +68,19 @@ image: fuzix.ld $(AOBJS) $(BOBJS)  main.o devtty.o kernel.def ../../cpu-68000/lo
 	$(CROSS_COMPILE)objcopy fuzix.elf -O binary ../../fuzix.bin
 
 
-IMAGES = $(FUZIX_ROOT)/Images/$(TARGET)
-PKG2 = $(FUZIX_ROOT)/Kernel/platform/platform-megadrive/fuzix-platform-megadrive2.pkg
+#	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld \
+#	68knano.o ../../start.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
+#	tricks.o main.o ../../timer.o ../../kdata.o 68000exception.o devices.o \
+#	../../devio.o ../../filesys.o ../../process.o ../../inode.o ../../syscall_fs.o \
+#	../../syscall_proc.o ../../syscall_other.o ../../mm.o ../../flat.o \
+#	../../blk512.o ../../tty.o ../../devsys.o ../../usermem.o ../../syscall_fs2.o \
+#	../../syscall_fs3.o ../../syscall_exec32.o ../../syscall_exec.o \
+#	ds3234.o blkdev.o devide.o devide_discard.o mbr.o \
+#	68000usercopy.o ../../cpu-68000/usermem_std-68000.o devtty.o libc.o ../../malloc.o \
+#	68000relocate.o \
+#	../../level2.o ../../syscall_level2.o ../../select.o > ../../fuzix.map
+
+
 
 
 

@@ -1,5 +1,5 @@
 umask 022
-# fsck -a /
+fsck -a /
 # setdate
 remount -n / rw
 prtroot >/etc/mtab
@@ -7,3 +7,6 @@ prtroot >/etc/mtab
 #fsck -a
 #mount -a
 #>/var/run/utmp
+#ps
+#free
+#/root/tapp
