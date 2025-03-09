@@ -87,6 +87,7 @@ void tty_interrupt(void)
     uint8_t c = keyboard_read();
     if (c == KEY_F12) {
     	dbg_toggle();
+	return;
     }
     tty_inproc(1, c);
 }

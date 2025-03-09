@@ -1,4 +1,4 @@
-#include "../control_ports.def"
+#include "control_ports.def"
 
 # SetXramAddrReg: macro reg, cmd
 #     and.l   #$FFFF, reg
@@ -192,10 +192,10 @@ printChar:
     and.l #0xFF, %d0
     cmp.b #0x0A, %d0                      | Carriage return
     beq _newline
-    cmp.b #127, %d0                       | Is it higher than the highest printable character?
-    bgt _skipPrintChar
-    sub.b #32, %d0
-    bmi _skipPrintChar                    | Less than space
+    # cmp.b #127, %d0                       | Is it higher than the highest printable character?
+    # bgt _skipPrintChar
+    # sub.b #32, %d0
+    # bmi _skipPrintChar                    | Less than space
 _printCharNoCheck:
     move.l #vram_addr_plane_write, %d5   | cd0 = 1 (write), A=0xE000 (A15=1 A14=1 A13=1 A12=0) plane b
 

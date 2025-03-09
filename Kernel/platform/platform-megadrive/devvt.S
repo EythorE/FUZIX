@@ -173,7 +173,7 @@ plot_char:
     # beq _skipPrintChar
     # cmp.b #127, %d0                       | Is it higher than the highest printable character?
     # bgt _skipPrintChar
-    sub.b #32, %d0
+    # sub.b #32, %d0 | larger font now
     bmi _skipPrintChar                    | Less than space
 
     move.w %d0, (VDP_DATA)

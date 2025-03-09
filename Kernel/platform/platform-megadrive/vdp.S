@@ -1,4 +1,4 @@
-#include "../control_ports.def"
+#include "control_ports.def"
 
 .equ vdp_cmd_vram_write, 0x40000000
 .equ vdp_cmd_cram_write, 0xC0000000

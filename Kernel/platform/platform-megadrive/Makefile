@@ -1,10 +1,7 @@
 CSRCS = devtty.c devices.c libc.c main.c devrd.c dbg.c keyboard.c
 COBJS = $(CSRCS:.c=$(BINEXT))
 
-BSRC = $(wildcard bios/*.S)
-BOBJS = $(patsubst bios/%.S,%.o, $(BSRC))
-
-ASRCS = crt0.S tricks.S megadrive.S devvt.S keyboard_read.S
+ASRCS = crt0.S tricks.S megadrive.S devvt.S keyboard_read.S dbg_output.S vdp.S font_init.S
 AOBJS = $(ASRCS:.S=.o)
 
 # DSRCS = ../../dev/devrd.c
@@ -21,9 +18,6 @@ all: $(OBJS)
 
 $(AOBJS): %.o: %.S
 	$(CROSS_AS) $(ASOPTS) $<
-
-$(BOBJS): %.o: bios/%.S
-	$(CROSS_AS) $(ASOPTS) $< -o $@
 	
 $(DOBJS): %.o: ../../dev/%.c
 	$(CROSS_CC) $(CROSS_CCOPTS) -c $< -o $@
@@ -35,6 +29,9 @@ $(DOBJS): %.o: ../../dev/%.c
 	$(CROSS_CC) $(CROSS_CCOPTS) -c $<
 
 $(LOBJS): %.o: ../../lib/%.c
+	$(CROSS_CC) $(CROSS_CCOPTS) -c $<
+
+font8x8.o: ../../font/font8x8.c
 	$(CROSS_CC) $(CROSS_CCOPTS) -c $<
 
 tricks.S: ../../lib/68000flat.S
@@ -54,9 +51,9 @@ clean:
 	rm -f fuzix.rom
 	(cd Applications; $(MAKE) clean)
 
-image: fuzix.ld $(AOBJS) $(BOBJS)  main.o devtty.o kernel.def ../../cpu-68000/lowlevel-68000.o ../../flat.o
-	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(AOBJS) $(BOBJS) \
-	keyboard.o devrd.o main.o devtty.o dbg.o \
+image: fuzix.ld $(AOBJS) main.o devtty.o kernel.def ../../cpu-68000/lowlevel-68000.o ../../flat.o font8x8.o 
+	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(AOBJS) \
+	keyboard.o devrd.o main.o devtty.o dbg.o font8x8.o \
 	../../vt.o ../../start.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
 	../../timer.o ../../kdata.o 68000exception.o devices.o \
 	../../devio.o ../../filesys.o ../../process.o ../../inode.o ../../syscall_fs.o \

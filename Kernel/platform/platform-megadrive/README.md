@@ -47,15 +47,16 @@ arguments are put on the stack in 4 byte bounderies.
 - [x] check implement a rom disk to load the kernel from; whatever that means
 - [x] Check if backspace can be implemented; return ascii for backspace to tty
 - [x] Switch to fuzix based VT; I have a feeling that the old code was significantly less complex and faster.
-- [] Fuzix has an 8x8 font
+- [x] Fuzix has an 8x8 font
 - [x] ...and some keyboard handling
 - [x] implement outchar for Kernel/cpu-68000/lowlevel-68000.S debug routines
 - [] add a suitable monitor which we can fall back to for debugging (plt_monitor)
 
 ## non-working apps
-- mount: causes Bus error
-- touch
-- fsck
+- ~~mount: causes Bus error~~
+    this now causes I/O error, but seems to work
+- ~~touch~~
+- ~~fsck~~
 - v7-games
 
 # It's writeable

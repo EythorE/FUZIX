@@ -31,6 +31,8 @@
 #define VT_RIGHT	39
 #define VT_BOTTOM	27
 
+#define CONFIG_FONT8X8
+
 /* Basic TTY defines needed by kernel */
 #define NUM_DEV_TTY 1     /* Minimum needed */
 #define TTYDEV   513      /* Default TTY device */

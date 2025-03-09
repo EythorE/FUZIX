@@ -1,4 +1,10 @@
-#include "../control_ports.def"
+#include "control_ports.def"
+
+#ifdef CONFIG_FONT8X8SMALL
+#define FONTDATAMAX 768
+#else
+#define FONTDATAMAX 2048
+#endif"
      .equ vdp_cmd_vram_write, 0x40000000
 
 #==============================================================
@@ -7,11 +13,12 @@
     .section .text
     .globl fontInit
 
-.set loop_counter, (96*8)-1  | number of bytes (96 glyphs, 8 bytes each) - 1 for dbra
+#.set loop_counter, (96*8)-1  | number of bytes (96 glyphs, 8 bytes each) - 1 for dbra
+.set loop_counter, FONTDATAMAX-1  | number of bytes (96 glyphs, 8 bytes each) - 1 for dbra
 
 fontInit:
 	move.l 	#loop_counter, %d2 ;
-	lea font, %a1
+	lea fontdata_8x8, %a1
 	# Start writes to address zero 
 	move.l #vdp_cmd_vram_write, VDP_CONTROL  | set_vram_write 0x0 (vram_addr_tiles)
 nextFont:
@@ -37,12 +44,3 @@ rolin:
 	move.l	%d1, (VDP_DATA)	| write long to VDP
 	dbra	%d2, nextFont		| loop until done
 	rts
-
-
-    .section .rodata
-#==============================================================
-# Data
-#==============================================================
-
-font:
-	.incbin "data/PetMe.FNT"
