@@ -12,7 +12,7 @@
 
 
 
-#define BOOTDEVICE 1            /* 0 is the rom disk, 1 is the ram disk */
+// #define BOOTDEVICE 1            /* 0 is the rom disk, 1 is the ram disk */
 
 /* ROM ramdisk definitions */
 #define BLKSHIFT 9                 /* 512 byte blocks */

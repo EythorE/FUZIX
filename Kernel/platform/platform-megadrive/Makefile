@@ -1,8 +1,8 @@
+ASRCS = crt0.S megadrive.S devvt.S keyboard_read.S dbg_output.S vdp.S
+AOBJS = $(ASRCS:.S=.o)
+
 CSRCS = devtty.c devices.c libc.c main.c devrd.c dbg.c keyboard.c
 COBJS = $(CSRCS:.c=$(BINEXT))
-
-ASRCS = crt0.S tricks.S megadrive.S devvt.S keyboard_read.S dbg_output.S vdp.S font_init.S
-AOBJS = $(ASRCS:.S=.o)
 
 # DSRCS = ../../dev/devrd.c
 # DOBJS = $(patsubst ../../dev/%.c,%.o, $(DSRCS))
@@ -10,36 +10,47 @@ AOBJS = $(ASRCS:.S=.o)
 LSRCS = ../../lib/68000exception.c ../../lib/68000usercopy.c ../../lib/68000relocate.c
 LOBJS = $(patsubst ../../lib/%.c,%.o, $(LSRCS))
 
-OBJS  = $(COBJS) $(AOBJS) $(BOBJS) $(DOBJS) $(LOBJS)
+CPUOBJS = ../../cpu-68000/usermem_std-68000.o ../../cpu-68000/lowlevel-68000.o
+KOBJS =	../../vt.o ../../start.o ../../version.o \
+	../../timer.o ../../kdata.o \
+	../../devio.o ../../filesys.o ../../process.o ../../inode.o ../../syscall_fs.o \
+	../../syscall_proc.o ../../syscall_other.o ../../mm.o ../../flat.o \
+	../../blk512.o ../../tty.o ../../devsys.o ../../usermem.o ../../syscall_fs2.o \
+	../../syscall_fs3.o ../../syscall_exec32.o ../../syscall_exec.o \
+	../../malloc.o \
+	../../level2.o ../../syscall_level2.o ../../select.o
+
+OBJS  = $(AOBJS) $(COBJS) $(DOBJS) $(LOBJS) 68000flat.o font8x8.o $(CPUOBJS) $(KOBJS)
 
 CROSS_CCOPTS += -I../../dev/
 
 all: $(OBJS)
 
+
 $(AOBJS): %.o: %.S
-	$(CROSS_AS) $(ASOPTS) $<
-	
+	$(CROSS_AS) $(ASOPTS) $< -o $@
+
+$(COBJS): %.o: %.c
+	$(CROSS_CC) $(CROSS_CCOPTS) -c $< -o $@
+
 $(DOBJS): %.o: ../../dev/%.c
 	$(CROSS_CC) $(CROSS_CCOPTS) -c $< -o $@
 
-$(COBJS): %.o: %.c
-	$(CROSS_CC) $(CROSS_CCOPTS) -c $<
-
-$(DOBJS): %.o: ../../dev/%.c
-	$(CROSS_CC) $(CROSS_CCOPTS) -c $<
-
 $(LOBJS): %.o: ../../lib/%.c
-	$(CROSS_CC) $(CROSS_CCOPTS) -c $<
+	$(CROSS_CC) $(CROSS_CCOPTS) -c $< -o $@
+
 
 font8x8.o: ../../font/font8x8.c
-	$(CROSS_CC) $(CROSS_CCOPTS) -c $<
+	$(CROSS_CC) $(CROSS_CCOPTS) -c $< -o $@
 
-tricks.S: ../../lib/68000flat.S
+68000flat.o: ../../lib/68000flat.S
+	$(CROSS_AS) $(ASOPTS) $< -o $@
+
 
 IMAGES = $(FUZIX_ROOT)/Images/$(TARGET)
-PKG2 = $(FUZIX_ROOT)/Kernel/platform/platform-megadrive/fuzix-platform-megadrive2.pkg
 
 clean:
+	# annoyingly not cleaned up
 	rm -rf $(FUZIX_ROOT)/Library/libs/crt0_68000.s
 	rm -rf $(FUZIX_ROOT)/Library/libs/crt0nostdio_68000.s
 	rm -rf $(FUZIX_ROOT)/Library/libs/setjmp_68000.s
@@ -51,53 +62,30 @@ clean:
 	rm -f fuzix.rom
 	(cd Applications; $(MAKE) clean)
 
-image: fuzix.ld $(AOBJS) main.o devtty.o kernel.def ../../cpu-68000/lowlevel-68000.o ../../flat.o font8x8.o 
-	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(AOBJS) \
-	keyboard.o devrd.o main.o devtty.o dbg.o font8x8.o \
-	../../vt.o ../../start.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
-	../../timer.o ../../kdata.o 68000exception.o devices.o \
-	../../devio.o ../../filesys.o ../../process.o ../../inode.o ../../syscall_fs.o \
-	../../syscall_proc.o ../../syscall_other.o ../../mm.o ../../flat.o \
-	../../blk512.o ../../tty.o ../../devsys.o ../../usermem.o ../../syscall_fs2.o \
-	../../syscall_fs3.o ../../syscall_exec32.o ../../syscall_exec.o \
-	68000usercopy.o ../../cpu-68000/usermem_std-68000.o libc.o ../../malloc.o \
-	68000relocate.o \
-	../../level2.o ../../syscall_level2.o ../../select.o > ../../fuzix.map
+image: fuzix.ld $(OBJS)
+	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld $(OBJS)  > ../../fuzix.map
 	$(CROSS_COMPILE)objcopy fuzix.elf -O binary ../../fuzix.bin
-
-
-#	$(CROSS_LD) -M -o fuzix.elf -T fuzix.ld \
-#	68knano.o ../../start.o ../../version.o ../../cpu-68000/lowlevel-68000.o \
-#	tricks.o main.o ../../timer.o ../../kdata.o 68000exception.o devices.o \
-#	../../devio.o ../../filesys.o ../../process.o ../../inode.o ../../syscall_fs.o \
-#	../../syscall_proc.o ../../syscall_other.o ../../mm.o ../../flat.o \
-#	../../blk512.o ../../tty.o ../../devsys.o ../../usermem.o ../../syscall_fs2.o \
-#	../../syscall_fs3.o ../../syscall_exec32.o ../../syscall_exec.o \
-#	ds3234.o blkdev.o devide.o devide_discard.o mbr.o \
-#	68000usercopy.o ../../cpu-68000/usermem_std-68000.o devtty.o libc.o ../../malloc.o \
-#	68000relocate.o \
-#	../../level2.o ../../syscall_level2.o ../../select.o > ../../fuzix.map
-
-
-
 
 
 # 4096*512b blocks = 2MB
 diskimage:
 	(cd Applications; $(MAKE))
 	cp ../../fuzix.bin $(IMAGES)/fuzix.rom
+	# romdisk, baked into the ROM
 	(cd $(FUZIX_ROOT)/Standalone/filesystem-src; ./build-filesystem-ng -X -f $(IMAGES)/filesystem.img -g 64 3968 -p platform-megadrive)
 	dd if=$(IMAGES)/filesystem.img of=$(IMAGES)/fuzix.rom bs=64K seek=1 conv=notrunc
 	
-	# Filesystem 2
+
+	# ramdisk, savefile
 	(cd $(FUZIX_ROOT)/Standalone/filesystem-src; ./build-filesystem-ng -X -f $(IMAGES)/filesystem2.img -g 64 3072 -p platform-megadrive-disk2)
-		@echo "cd root" > ucp.cmd
+	@echo "cd root" > ucp.cmd
 	@echo "get Applications/tapp tapp" >> ucp.cmd
 	@echo "chmod 777 tapp" >> ucp.cmd
 	$(FUZIX_ROOT)/Standalone/ucp $(FUZIX_ROOT)/Images/megadrive/filesystem2.img < ucp.cmd
 	@rm ucp.cmd
-# $(FUZIX_ROOT)/Standalone/ucp $(FUZIX_ROOT)/Images/megadrive/filesystem2.img 'cd root; get Applications/tapp tapp; chmod 777 tapp'
+
 	# Blastem does not like to have data in the rom binary in the address space of sram
-	rm -f /home/eythor/.local/share/blastem/fuzix/save.sram
+	rm -f of=$(IMAGES)/filesystem2.sram
 	# .sram is saved in 16-bit little-endian format (byte-swapped)!!
-	dd if=$(IMAGES)/filesystem2.img of=/home/eythor/.local/share/blastem/fuzix/save.sram bs=1536K conv=notrunc,swab
+	dd if=$(IMAGES)/filesystem2.img of=$(IMAGES)/filesystem2.sram bs=1536K conv=notrunc,swab
+	cp $(IMAGES)/filesystem2.sram /home/$(USER)/.local/share/blastem/fuzix/save.sram

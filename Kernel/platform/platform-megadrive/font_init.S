@@ -5,16 +5,21 @@
 #else
 #define FONTDATAMAX 2048
 #endif"
-     .equ vdp_cmd_vram_write, 0x40000000
+.equ vdp_cmd_vram_write, 0x40000000
 
 #==============================================================
-# Code
+# Write font glyphs to vram
 #==============================================================
     .section .text
     .globl fontInit
 
+#ifdef CONFIG_FONT8X8SMALL
+#define FONTDATAMAX 768
+#else
+#define FONTDATAMAX 2048
+#endif"
 #.set loop_counter, (96*8)-1  | number of bytes (96 glyphs, 8 bytes each) - 1 for dbra
-.set loop_counter, FONTDATAMAX-1  | number of bytes (96 glyphs, 8 bytes each) - 1 for dbra
+.equ loop_counter, FONTDATAMAX-1  | number of bytes - 1 for dbra
 
 fontInit:
 	move.l 	#loop_counter, %d2 ;
@@ -31,14 +36,13 @@ nextFont:
 
 	# have to move the lsbit 3 places left 1000, then rol a new bit in 0001 0001
 	move.l  #6, %d3     | do that 7 time (-1 for dbra)
-	bra rolin
 rolin:
 	rol.l   #3, %d1     | have to move the bit 3 places left 1000 then rol a new bit in 0001 0001
 	roxl.b	#1, %d0
 	roxl.l	#1, %d1
 	dbra    %d3, rolin
 
-	# add 1 to each nibble for the backroud to be non transparent
+	# add 1 to each nibble for the backround to be non transparent
 	add.l #0x11111111,%d1
 
 	move.l	%d1, (VDP_DATA)	| write long to VDP
