@@ -1,6 +1,8 @@
 #include "control_ports.def"
 
 .equ vdp_cmd_vram_write, 0x40000000
+.equ vdp_cmd_vsram_a_write, 0x40000010    | Vertical Scroll plane a
+.equ vdp_cmd_vsram_b_write, 0x40020010    | Vertical Scroll plane b
 .equ vdp_cmd_cram_write, 0xC0000000
 
 #==============================================================
@@ -12,6 +14,35 @@
     .globl VDP_LoadRegisters
     .globl VDP_ClearVRAM
     .globl fontInit
+    .globl VDP_reinit
+    .globl VDP_clear
+
+
+
+VDP_clear:
+    bsr VDP_clearPallete
+    bsr VDP_ClearVRAM
+    bsr VDP_LoadRegisters
+    move.l #vdp_cmd_vsram_a_write,(VDP_CONTROL)
+    move.w #0,(VDP_DATA)
+    move.l #vdp_cmd_vsram_b_write,(VDP_CONTROL)
+    move.w #0,(VDP_DATA)
+    rts
+
+
+VDP_reinit:
+    bsr VDP_clearPallete
+    bsr VDP_ClearVRAM
+    bsr VDP_LoadRegisters
+    bsr VDP_writePallete
+    move.l #vdp_cmd_vsram_a_write,(VDP_CONTROL)
+    move.w #0,(VDP_DATA)
+    move.l #vdp_cmd_vsram_b_write,(VDP_CONTROL)
+    move.w #0,(VDP_DATA)
+    move.w #0,(scroll_amount)
+    jsr dbg_clear
+    bsr fontInit
+    rts
 
 #==============================================================
 # Initialize TMSS (Trademark Security System)
@@ -37,14 +68,14 @@ SkipTMSS:
 #==============================================================
 # Clear VRAM
 #==============================================================
-.set size_word, 2
-.set loop_counter, (0x00010000 / size_word) - 1  |  64kb in words (-1 for DBRA loop)
+.set size_long, 4
+.set loop_counter, (0x00010000 / size_long) - 1  |  64kb in longs (-1 for DBRA loop)
 VDP_ClearVRAM:
 	# Setup the VDP to write to VRAM address $0000 (start of VRAM)
     move.l #vdp_cmd_vram_write, (VDP_CONTROL) | set_vram_write $0000
     move.w #loop_counter, %d0
 ClrVramLp:                    | Start of loop
-    move.w #0x0, (VDP_DATA)   | Write a 0x0000 (word size) to VRAM
+    move.l #0x0, (VDP_DATA)   | Write a 0x0000 (word size) to VRAM
     dbra %d0, ClrVramLp       | Decrement d0 and loop until finished (when d0 reaches -1)
     rts
 
@@ -61,6 +92,17 @@ VDP_writePallete:
 PalLp:
     move.w (%a0)+, VDP_DATA
     dbra %d0, PalLp
+    rts
+
+
+VDP_clearPallete:
+    move.l #vdp_cmd_cram_write, VDP_CONTROL  | set_cram_write $0000
+    lea Palette, %a0
+    move.l #31, %d0     | 8 words in palette 4 palletes (8*4//2 words -1 for DBRA loop)
+    move.l #0, %d1
+ClPalLp:
+    move.l %d1, VDP_DATA
+    dbra %d0, ClPalLp
     rts
 
 

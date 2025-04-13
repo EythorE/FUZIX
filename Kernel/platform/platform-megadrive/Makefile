@@ -1,7 +1,7 @@
 ASRCS = crt0.S megadrive.S devvt.S keyboard_read.S dbg_output.S vdp.S
 AOBJS = $(ASRCS:.S=.o)
 
-CSRCS = devtty.c devices.c libc.c main.c devrd.c dbg.c keyboard.c
+CSRCS = devtty.c devices.c libc.c main.c devrd.c dbg.c keyboard.c devvdp.c
 COBJS = $(CSRCS:.c=$(BINEXT))
 
 # DSRCS = ../../dev/devrd.c
@@ -78,14 +78,19 @@ diskimage:
 
 	# ramdisk, savefile
 	(cd $(FUZIX_ROOT)/Standalone/filesystem-src; ./build-filesystem-ng -X -f $(IMAGES)/filesystem2.img -g 64 3072 -p platform-megadrive-disk2)
-	@echo "cd root" > ucp.cmd
-	@echo "get Applications/tapp tapp" >> ucp.cmd
-	@echo "chmod 777 tapp" >> ucp.cmd
-	$(FUZIX_ROOT)/Standalone/ucp $(FUZIX_ROOT)/Images/megadrive/filesystem2.img < ucp.cmd
-	@rm ucp.cmd
+	#@echo "cd root" > ucp.cmd
+	#@echo "get Applications/tapp tapp" >> ucp.cmd
+	#@echo "get Applications/imshow imshow" >> ucp.cmd
+	#@echo "get /home/eythor/github/sega_toolchain/examples/imshow/lena.mimg lena.mimg" >> ucp.cmd
+	#@echo "get /home/eythor/github/sega_toolchain/examples/imshow/macaw.mimg macaw.mimg" >> ucp.cmd
+	#@echo "get /home/eythor/github/sega_toolchain/examples/imshow/baboon.mimg baboon.mimg" >> ucp.cmd
+	#@echo "chmod 777 tapp" >> ucp.cmd
+	#@echo "chmod 777 imshow" >> ucp.cmd
+	#$(FUZIX_ROOT)/Standalone/ucp $(FUZIX_ROOT)/Images/megadrive/filesystem2.img < ucp.cmd
+	#@rm ucp.cmd
 
 	# Blastem does not like to have data in the rom binary in the address space of sram
-	rm -f of=$(IMAGES)/filesystem2.sram
+	rm -f $(IMAGES)/filesystem2.sram
 	# .sram is saved in 16-bit little-endian format (byte-swapped)!!
 	dd if=$(IMAGES)/filesystem2.img of=$(IMAGES)/filesystem2.sram bs=1536K conv=notrunc,swab
 	cp $(IMAGES)/filesystem2.sram /home/$(USER)/.local/share/blastem/fuzix/save.sram

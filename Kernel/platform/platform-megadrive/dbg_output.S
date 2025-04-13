@@ -41,18 +41,30 @@ vscroll_amount:
     .word 0                              | Keep track of how much we scrolled
 	
 
-
     .section .text
     .globl printString, printStringA0, printChar, printLong, printWord, printByte, clearLine, newline
-    .globl outchar,dbg_registers,dbg_memory,dbg_stack,dbg_toggle,dbg_rte,dbg_printf
+    .globl outchar,dbg_registers,dbg_memory,dbg_stack,dbg_toggle,dbg_rte,dbg_printf,dbg_clear
+
+dbg_clear:
+    move.l #vdp_cmd_vsram_write, VDP_CONTROL
+    move.w #0,%d0
+    move.b %d0,cursor_x
+    move.b %d0,cursor_y
+    move.b %d0,scrolling
+    move.w %d0,vscroll_amount
+    move.w %d0, (VDP_DATA) | clear vdp scroll amount
+    # set to on then toggle off so we dissable the plane in the vdp
+    move.b #1,dbg_plane_enabled
+    bsr dbg_toggle
+    rts
 
 dbg_toggle:
 	# we write to register i by writing bytes register,value to the vdp control port
 	# with the top bit set, so 0x84 for 0x04
 	# register 0x04 is Plane B Name Table Location.
-	# we write 0x00 to it to dissable it, and 0x07 to enable (0xE000) is our b plane name table)
+	# we write 0x00 to it to disable it, and 0x07 to enable (0xE000) is our b plane name table)
 	tst.b   dbg_plane_enabled
-    	beq     dbg_enable
+    beq     dbg_enable
     
 	| Disable
 	move.w  #0x8400,(VDP_CONTROL)
@@ -61,7 +73,7 @@ dbg_toggle:
 dbg_enable:
 	move.w  #0x8407,(VDP_CONTROL)
 	move.b  #1,dbg_plane_enabled
-    	rts
+    rts
 
 
 #==============================================================

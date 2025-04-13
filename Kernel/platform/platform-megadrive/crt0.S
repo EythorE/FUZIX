@@ -105,11 +105,11 @@
 # table is in the wrong place or in the wrong format.
 #==============================================================
 	.ascii "SEGA MEGA DRIVE "    | Console name
-	.ascii "eythore         "    | Copyright holder and release date
-	.ascii "WozMon          "	 | 0x120 48 bytes | Game title (domestic)
+	.ascii "EythorE         "    | Copyright holder and release date
+	.ascii "FUZIX           "	 | 0x120 48 bytes | Game title (domestic)
 	.ascii "                "
 	.ascii "                " 
-	.ascii "WozMon          "	 | 0x150 48 bytes | Game title (overseas)
+	.ascii "FUZIX           "	 | 0x150 48 bytes | Game title (overseas)
 	.ascii "                "
 	.ascii "                " 
 	.ascii "GM XXXXXXXX-XX"      | Version number

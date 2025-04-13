@@ -3,7 +3,14 @@ package  platform-megadrive-disk2
 disable-pkg ALL platform-megadrive-disk2
 enable-pkg basefs libs util util-mini V7-cmd-micro V7-cmd V7-sh V7-fsh V7-games
 
-d 0755 /root/disk2
+# imshow
+f 0775 /bin/imshow Applications/imshow
+
+d 0775 /root/images
+f 0664 /root/images/lena.simg Applications/image_convert/lena.simg
+f 0664 /root/images/baboon.simg Applications/image_convert/baboon.simg
+f 0664 /root/images/macaw.simg Applications/image_convert/macaw.simg
+
 
 # Remove standard rc/inittab and add our platform versions
 r /etc/rc
@@ -13,6 +20,7 @@ r /dev/rd0
 r /dev/rd1
 n 60660 0 /dev/rd0
 n 60660 1 /dev/rd1
+n 20660 2048 /dev/vdp
 
 r /usr/bin/gpiotool
 

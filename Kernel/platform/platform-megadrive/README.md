@@ -13,10 +13,16 @@ blastem Images/megadrive/fuzix.rom
 
 
 # Debug
-F12 can debug the debug overlay on/off, provided by output.S
+F12 toggles the debug overlay on/off, provided by output.S
 
 debug with blastem:
 m68k-elf-gdb -q --tui -ex "target remote | blastem -D Images/megadrive/fuzix.rom"  Kernel/platform/platform-megadrive/fuzix.elf
+
+We can pass CI_TESTING=1 to make to skip the login. make CI_TESTING=1 diskimage && blastem Images/megadrive/fuzix.rom
+
+We can use Standalone/ucp to browse and manipulate a filesystem 
+```Standalone/ucp Images/megadrive/filesystem2.img```
+Or for the byte-reversed .sram then use ucp -b
 
 
 ## Buildtools

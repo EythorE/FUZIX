@@ -24,6 +24,7 @@
 # mb020:	68020 single board
 # micro80:	Bill Shen's micro80 design
 # mini11:	Mini11 68HC11A SBC
+# megadrive:	Sega Mega Drive
 # msx1:		MSX1 as a cartridge
 # msx2:		MSX2 with 128K or more and MegaFlashROM+SD interface
 #		(or OpenMSX suitably configured)

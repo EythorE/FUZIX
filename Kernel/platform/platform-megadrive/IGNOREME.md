@@ -1,4 +1,33 @@
 # Notes
+Creating vdp device:
+- implement open, write, ioctl
+- add device to device table in devices.c (packed to 8 for some reason)
+- mknod in the file system (character device major 8 minor 0 -> 8*256 = 2048)
+  in filesystem.pkg `n /dev/vdp 20660 2048` (permission = 660)
+
+when we write to /dev/vdp, we get in kernel driver:
+minor - indicates the minor number from 0-255 of the device being accessed.
+flag - holds the persistent subset of flags passed on open. Notably this
+includes O_NDELAY indicating that an error should be returned if the I/O
+cannot be completed reasonably quickly.
+rawflag - indicates the mode of access:
+For character devicesthe raw flag will always be 1 (character I/O). 
+(For block devices it may be 0 (Block I/O) or 2 (Swap)).
+
+The data is contained in the udata structure:
+udata.u_base - pointer to the data
+udata.u_count - the number of bytes
+
+The ioctl interface provides a generic interface for out of band control or
+requests that do not fit a read/write mechanism. Some ioctls are generic
+whilst others may be defined by a particular device or class of device.
+
+    int ioctl(uint_fast8_t minor, uarg_t request, char *data);
+a generic prototype is in Library/include/syscalls.h that can be included in user space apps
+
+if the terminal ends up broken, not echoing characters for examply try:
+stty sane
+
 ~~executables seem to work if I put them in rc, so there must be something wrong in platform (i/o) interrupt code?~~
 
 ~~It seems syscalls from userspace are not handled correctly!~~
