@@ -20,6 +20,7 @@
 
 
 VDP_clear:
+    movem.l %d0/%d1/%a0/%a1, -(%sp)
     bsr VDP_clearPallete
     bsr VDP_ClearVRAM
     bsr VDP_LoadRegisters
@@ -27,10 +28,12 @@ VDP_clear:
     move.w #0,(VDP_DATA)
     move.l #vdp_cmd_vsram_b_write,(VDP_CONTROL)
     move.w #0,(VDP_DATA)
+    movem.l (%sp)+, %d0/%d1/%a0/%a1
     rts
 
 
 VDP_reinit:
+    movem.l %d0/%d1/%a0/%a1, -(%sp)
     bsr VDP_clearPallete
     bsr VDP_ClearVRAM
     bsr VDP_LoadRegisters
@@ -42,6 +45,7 @@ VDP_reinit:
     move.w #0,(scroll_amount)
     jsr dbg_clear
     bsr fontInit
+    movem.l (%sp)+, %d0/%d1/%a0/%a1
     rts
 
 #==============================================================

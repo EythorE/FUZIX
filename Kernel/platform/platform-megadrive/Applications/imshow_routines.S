@@ -14,6 +14,7 @@
 # single arg: buffer to data
 _imshow:
     move.l 4(%sp),%a0 | this is the pointer to the image, this is extremly iffy
+    movem.l %d0-%d7/%a0-%a7, -(%sp)
     jsr writePallete
     jsr imgInit
 
@@ -38,6 +39,7 @@ _imshow:
     move.b #0x00, %d4
     move.w #0b0110001100000001,%d2 | attr(plt 4),gfx 768=0x300
     bsr tileImgShow
+    movem.l (%sp)+, %d0-%d7/%a0-%a7
     rts
 
 

@@ -4,6 +4,7 @@ Creating vdp device:
 - add device to device table in devices.c (packed to 8 for some reason)
 - mknod in the file system (character device major 8 minor 0 -> 8*256 = 2048)
   in filesystem.pkg `n /dev/vdp 20660 2048` (permission = 660)
+- I really should clean up register usage in some assembly routines
 
 when we write to /dev/vdp, we get in kernel driver:
 minor - indicates the minor number from 0-255 of the device being accessed.

@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+/* Global resource that needs cleanup */
+FILE *logfile = NULL;
+
+/* Signal handler function */
+void cleanup_handler(int signum) {
+    printf("\nReceived signal %d. Cleaning up and exiting...\n", signum);
+    
+    /* Perform cleanup operations */
+    if (logfile != NULL) {
+        fprintf(logfile, "Program terminated by signal %d\n", signum);
+        fflush(logfile);
+        fclose(logfile);
+        printf("Logfile closed successfully.\n");
+    }
+    
+    /* Exit with a special code to indicate signal termination */
+    exit(128 + signum);
+}
+
+int main(void) {
+    /* Set up signal handler for SIGINT (Ctrl+C) */
+    signal(SIGINT, cleanup_handler);
+    
+    /* Also handle SIGTERM (killall, kill default signal) */
+    signal(SIGTERM, cleanup_handler);
+    
+    /* Open a resource that needs proper cleanup */
+    logfile = fopen("program.log", "w");
+    if (logfile == NULL) {
+        perror("Failed to open logfile");
+        return 1;
+    }
+    
+    fprintf(logfile, "Program started\n");
+    printf("Program running. Press Ctrl+C to terminate.\n");
+    
+    /* Main program loop */
+    while (1) {
+        fprintf(logfile, "Still running...\n");
+        fflush(logfile);
+        printf(".");
+        fflush(stdout);
+        sleep(1);
+    }
+    
+    /* This code will never be reached due to the infinite loop,
+       but we include it for completeness */
+    fclose(logfile);
+    return 0;
+}
+
+
+// #include <stdio.h>
+// int main(int argc, char **argv)
+// {
+//     puts("Hello world\n");
+//     // ((void (*)(void))0x0000083c)();
+//     return 0;
+// }
