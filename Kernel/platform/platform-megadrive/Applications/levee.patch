@@ -1,0 +1,29 @@
+diff --git a/Applications/levee/Makefile.common b/Applications/levee/Makefile.common
+index 93e29553f..44554aedb 100644
+--- a/Applications/levee/Makefile.common
++++ b/Applications/levee/Makefile.common
+@@ -23,7 +23,7 @@ $(OBJSA): %.o-a: %.c $(HDRS)
+ 	$(CC) $(CFLAGS) $(COPT) -c -DVT52=0 -DANSI=1 -o $*.o-a $*.c
+ 
+ $(OBJSV): %.o-v: %.c $(HDRS)
+-	$(CC) $(CFLAGS) $(COPT) -c -DVT52=1 -DANSI=0 -o $*.o-v $*.c
++	$(CC) $(CFLAGS) -Wno-implicit-int -Wno-return-type $(COPT) -c -DVT52=1 -DANSI=0 -o $*.o-v $*.c
+ 
+ clean:
+ 	rm -rf $(OBJS) $(OBJSL) $(OBJSA) $(OBJSV) *.lst *.sym *.map *.noi *.lk *.ihx *.tmp *~ *.o *.rel *.asm
+diff --git a/Applications/levee/levee.h b/Applications/levee/levee.h
+index bea51cfd1..e82ee5a18 100644
+--- a/Applications/levee/levee.h
++++ b/Applications/levee/levee.h
+@@ -166,9 +166,9 @@ extern long gemdos();
+ #if !(ST | TERMCAP)
+ 
+ #ifndef LINES
+-#define LINES	25
++#define LINES	28
+ #endif  /*LINES*/
+-#define COLS	79
++#define COLS	40
+ 
+ #endif
+ 

@@ -77,12 +77,24 @@ dbg_enable:
 
 
 #==============================================================
-# dbg_printf function - supports %b, %w, %l, %s
+# dbg_printf function - supports %c, %b, %w, %l, %s
 # void dbg_printf(char *s, ...);
 #
 # Arguments are passed on the stack in 4-byte boundaries
 # Format string is at 4(%sp)
 # Additional arguments start at 8(%sp)
+# Usage:
+# .section .data
+# format_string:
+#    .asciz "arg1=%w arg2=%l arg3='%c'\n"
+#    .align(2)
+# .section .text
+#    move.l %d2, -(%sp) | arg3
+#    move.l %d1, -(%sp) | arg2
+#    move.l %d0, -(%sp) | arg1
+#    pea format_string
+#    jsr dbg_printf
+#    add.l #16,%sp
 #==============================================================
 dbg_printf:
     movem.l %d0-%d1/%a0-%a1, -(%sp)   | Save registers we'll use
@@ -103,6 +115,9 @@ dprintf_loop:
     beq     dprintf_done              | If end of string, exit
     
     # Check which format specifier
+    cmp.b   #'c', %d0                 | Char?
+    beq     dprintf_char
+
     cmp.b   #'b', %d0                 | Byte?
     beq     dprintf_byte
     
@@ -122,6 +137,8 @@ dprintf_loop:
     jsr     printChar
     bra     dprintf_loop
     
+dprintf_char:
+    move.l  (%a1)+, %d0
 dprintf_regular:
     jsr     printChar                 | Print regular character
     bra     dprintf_loop
@@ -223,7 +240,8 @@ _printCharNoCheck:
     add.l %d4, %d5
     #       15|   14,13 |    12 |    11 |       10-0
     # Priority | Palette | VFlip | HFlip | Tile Index
-    add.w #0xA000,%d0
+    add.w #0xA000,%d0 | high priority
+    #add.w #0x2000,%d0 | low priority
     move.l %d5, (VDP_CONTROL)
     move.w %d0, (VDP_DATA)
 
@@ -261,7 +279,7 @@ _scrollPage:
 
     # Write Plane's V-scroll value to vertical scroll memory (VSRAM)
 	#   Plane's vertical page scroll value is at VSRAM $0000,Plane B's is at $0002.
-    move.l #vdp_cmd_vsram_write, VDP_CONTROL
+    move.l #vdp_cmd_vsram_write, (VDP_CONTROL)
     move.w %d5, (VDP_DATA)
 _skipPrintChar:
     movem.l (%sp)+, %d0/%d1/%d2/%d4/%d5

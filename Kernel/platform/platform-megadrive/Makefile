@@ -50,6 +50,10 @@ font8x8.o: ../../font/font8x8.c
 IMAGES = $(FUZIX_ROOT)/Images/$(TARGET)
 
 clean:
+	#levee patch
+	-(patch --reverse -r - -f -p1 -d $(FUZIX_ROOT) < Applications/levee.patch)
+	rm -f $(FUZIX_ROOT)/Applications/levee/*.orig
+
 	# annoyingly not cleaned up
 	rm -rf $(FUZIX_ROOT)/Library/libs/crt0_68000.s
 	rm -rf $(FUZIX_ROOT)/Library/libs/crt0nostdio_68000.s
@@ -69,7 +73,11 @@ image: fuzix.ld $(OBJS)
 
 # 4096*512b blocks = 2MB
 diskimage:
+	-(patch --forward -r - -f -p1 -d $(FUZIX_ROOT) < Applications/levee.patch)
+	(cd $(FUZIX_ROOT)/Applications/levee; $(MAKE) -f Makefile.$(USERCPU) levee-vt52)
+
 	(cd Applications; $(MAKE))
+
 	cp ../../fuzix.bin $(IMAGES)/fuzix.rom
 	# romdisk, baked into the ROM
 	(cd $(FUZIX_ROOT)/Standalone/filesystem-src; ./build-filesystem-ng -X -f $(IMAGES)/filesystem.img -g 64 3968 -p platform-megadrive)
@@ -78,16 +86,6 @@ diskimage:
 
 	# ramdisk, savefile
 	(cd $(FUZIX_ROOT)/Standalone/filesystem-src; ./build-filesystem-ng -X -f $(IMAGES)/filesystem2.img -g 64 3072 -p platform-megadrive-disk2)
-	#@echo "cd root" > ucp.cmd
-	#@echo "get Applications/tapp tapp" >> ucp.cmd
-	#@echo "get Applications/imshow imshow" >> ucp.cmd
-	#@echo "get /home/eythor/github/sega_toolchain/examples/imshow/lena.mimg lena.mimg" >> ucp.cmd
-	#@echo "get /home/eythor/github/sega_toolchain/examples/imshow/macaw.mimg macaw.mimg" >> ucp.cmd
-	#@echo "get /home/eythor/github/sega_toolchain/examples/imshow/baboon.mimg baboon.mimg" >> ucp.cmd
-	#@echo "chmod 777 tapp" >> ucp.cmd
-	#@echo "chmod 777 imshow" >> ucp.cmd
-	#$(FUZIX_ROOT)/Standalone/ucp $(FUZIX_ROOT)/Images/megadrive/filesystem2.img < ucp.cmd
-	#@rm ucp.cmd
 
 	# Blastem does not like to have data in the rom binary in the address space of sram
 	rm -f $(IMAGES)/filesystem2.sram

@@ -46,6 +46,7 @@ plt_idle:
 init_hardware:
 	    move.w #512,ramsize
 	    move.w #232,procmem
+        jsr vtinit
         rts
 
 

@@ -94,7 +94,7 @@ VDP_writePallete:
     lea Palette, %a0
     move.w #31, %d0     | 8 words in palette (8*2 -1 for DBRA loop)
 PalLp:
-    move.w (%a0)+, VDP_DATA
+    move.l (%a0)+, VDP_DATA
     dbra %d0, PalLp
     rts
 
@@ -171,7 +171,14 @@ rolin:
 
 	move.l	%d1, (VDP_DATA)	| write long to VDP
 	dbra	%d2, nextFont		| loop until done
-	rts
+
+    # add an additional cursor tile | this was for shadow/highlight cursor, it was suboptimal!
+#    move.w #7, %d0
+#    move.l #0xEEEEEEEE,%d1
+#_lp_cursor_tile:
+#	move.l	%d1, (VDP_DATA)	| write long to VDP
+#	dbra	%d0, _lp_cursor_tile | loop until done
+    rts
 
 
 
@@ -218,7 +225,7 @@ VDPRegisters:
     .byte 0x00  | $09:  Unused
     .byte 0x08  | $0A: Frequency of Horiz. interrupt in Rasters (number of lines travelled by the beam)
     .byte 0x00  | $0B: External interrupts off, V scroll fullscreen, H scroll fullscreen
-    .byte 0x81  | $0C: Shadows and highlights off, interlace off, H40 mode (320 x 224 screen res)
+    .byte 0x81  | $0C: Shadows and highlights 81/89 off/on, interlace off, H40 mode (320 x 224 screen res)
     .byte 0x3F  | $0D: Horiz. scroll table at VRAM $FC00 (bits 0-5)
     .byte 0x00  | $0E: Unused
     .byte 0x02  | $0F: Autoincrement 2 bytes
@@ -242,18 +249,20 @@ VDPRegisters:
 #==============================================================
 # Each colour is in binary format 0000 BBB0 GGG0 RRR0
 # The bottom bit is discarded, can only use even values
-# (0,2,4,6,8,A,C,E). So 0x0000 is black, 0x0EEE is white
-# 0x000E is red, 0x00E0 is green, and 0x0E00 is blue.
+# (0,2,4,6,8,A,C,E).
+# 0x0000: black, 0x0EEE: white, 0x0E0E: pink
+# 0x000E: red, 0x00E0: green 0x0E00: blue
 #==============================================================
 Palette:
-    .word 0x0000  | Colour 0 = Transparent
+    .word 0x0000  | Colour 0 = Transparent (gray) / global background
     .word 0x0000  | Colour 2 = Black
-    .word 0x0EEE  | Colour 1 = White
-    .word 0x000E  | Colour 3 = Red
-    .word 0x00E0  | Colour 4 = Blue
-    .word 0x0E00  | Colour 5 = Green
-    .word 0x0E0E  | Colour 6 = Pink
-    .word 0x0000  | Leave the rest black...
+    .word 0x0CCC  | Colour 1 = White
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+
     .word 0x0000
     .word 0x0000
     .word 0x0000
@@ -264,15 +273,45 @@ Palette:
     .word 0x0000
 
 Palette1:
-    .word 0x00E0  | Colour 4 = Blue
-    .word 0x0EEE  | Colour 1 = White
-    .word 0x000E  | Colour 3 = Red
-    .word 0x0000  | Colour 2 = Black
     .word 0x0000  | Colour 0 = Transparent
-    .word 0x0E00  | Colour 5 = Green
-    .word 0x0E0E  | Colour 6 = Pink
-    .word 0x0000  | Leave the rest black...
+    .word 0x0CCC  | dgb background
+    .word 0x022C  | dbg foreground
     .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000  | no shadow and highlight
+    .word 0x0000
+
+Palette2:
+    .word 0x0000  | Colour 0 = Transparent
+    .word 0x0AAA  | cursor background
+    .word 0x0222  | cursor foreground
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000  | no shadow and highlight
+    .word 0x0000
+
+Palette3:
+    .word 0x0000  | Colour 0 = Transparent
     .word 0x0000
     .word 0x0000
     .word 0x0000
@@ -281,5 +320,13 @@ Palette1:
     .word 0x0000
     .word 0x0000
 
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000
+    .word 0x0000  | highlight pixel beneath
+    .word 0x0000  | shadow pixel beneath
 
 

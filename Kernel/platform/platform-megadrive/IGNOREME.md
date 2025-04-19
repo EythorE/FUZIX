@@ -1,3 +1,21 @@
+# TODO2
+- [] Check if we can get termcap and or curses to work.
+- [] Rewisit ram issues.
+- [] How to best configure the rom/ram disk, configuration for cartridge?
+- [] Create library to communicate with the vdp 'vdpcmd set background #0x0RGB' make it FORTH
+
+# using ucp
+	echo "cd root" > ucp.cmd
+	echo "get Applications/tapp tapp" >> ucp.cmd
+	echo "chmod 777 tapp" >> ucp.cmd
+	$(FUZIX_ROOT)/Standalone/ucp -X $(FUZIX_ROOT)/Images/megadrive/filesystem2.sram < ucp.cmd
+
+# Application notes
+To build levee-vt52; we need to add -Wno-implicit-int -Wno-return-type to the gcc flags.
+I unwisely modified Makefile.common directly.
+In levee.h set LINES to VT_HEIGHT [28], and COLS to VT_WIDTH [40].
+There is no way configure it easily, cols is hard coded.
+
 # Notes
 Creating vdp device:
 - implement open, write, ioctl
@@ -51,6 +69,8 @@ When it comes to returning an aggregate-type object, the object should be stored
 arguments are put on the stack in 4 byte bounderies.
 
 # TODO
+- [x] imshow app and a vdp device driver, image convert python script
+- [x] Cursor sprite, also tried using shadow/highlight for cursor but it didnt look good.
 - [] Fix interrupt handling in megadrive.S.
 - [] Interrupt handling in Kernel/cpu-68000/lowlevel-68000.S:784 seems it needs fixing. 
 - [x] make filesystem writeable
