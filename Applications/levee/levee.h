@@ -166,9 +166,9 @@ extern long gemdos();
 #if !(ST | TERMCAP)
 
 #ifndef LINES
-#define LINES	25
+#define LINES	28
 #endif  /*LINES*/
-#define COLS	79
+#define COLS	40
 
 #endif
 

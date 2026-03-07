@@ -23,7 +23,7 @@ $(OBJSA): %.o-a: %.c $(HDRS)
 	$(CC) $(CFLAGS) $(COPT) -c -DVT52=0 -DANSI=1 -o $*.o-a $*.c
 
 $(OBJSV): %.o-v: %.c $(HDRS)
-	$(CC) $(CFLAGS) $(COPT) -c -DVT52=1 -DANSI=0 -o $*.o-v $*.c
+	$(CC) $(CFLAGS) -Wno-implicit-int -Wno-return-type $(COPT) -c -DVT52=1 -DANSI=0 -o $*.o-v $*.c
 
 clean:
 	rm -rf $(OBJS) $(OBJSL) $(OBJSA) $(OBJSV) *.lst *.sym *.map *.noi *.lk *.ihx *.tmp *~ *.o *.rel *.asm
