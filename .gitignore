@@ -44,4 +44,4 @@ size.report
 .obj
 *.elf
 bin
-*.debug
+*.debug__pycache__/
