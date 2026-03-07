@@ -39,30 +39,8 @@ cursor_off:
 
 
 read_cursor_char:
-    # get the character under the cursor from vdp
-    # args: y: d0, x: d1
-    # returns sprite num in d4
-    movem.l %d2-%d3,-(%sp)
-    clr.l %d2
-    move.w (scroll_amount), %d2 | map y to vdp coordinates
-    lsr.w   #3, %d2              | B // 8
-    add.w %d0, %d2             | y + scroll_up
-    and.w #0x1F, %d2             | Modulo 32 (rows in VRAM)
-    # d2 contains the y row
-
-    move.l #vram_addr_plane_read, %d3
-    swap %d2
-    rol.l #7, %d2
-    add.l %d2, %d3
-
-    move.b %d1, %d2 | x
-    swap %d2
-    rol.l #1, %d2
-    add.l %d2, %d3
-
-    move.l %d3, (VDP_CONTROL)
-    move.w (VDP_DATA), %d4
-    movem.l (%sp)+, %d2-%d3
+    # Stubbed to avoid blastem 0.6.3 VDP read freeze
+    moveq #0, %d4
     rts
     
 
