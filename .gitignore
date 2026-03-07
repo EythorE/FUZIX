@@ -16,6 +16,28 @@ cscope.*
 *.a
 # Emacs backup
 *~
+# Patch artifacts
+*.orig
+# Levee build artifacts
+*.o-v
+# Python venv
+venv/
+# Generated images
+*.simg
+# Screenshots from emulator testing
+*.png
+# Run scripts (generated)
+run_*.sh
+# Generated syscall stubs
+Library/libs/fuzix68000/
+Library/libs/crt0_68000.s
+Library/libs/crt0nostdio_68000.s
+Library/libs/setjmp_68000.s
+# Build tools
+Library/tools/syscall_8070
+# Compiled application binaries
+Applications/games/2048/2048
+Kernel/platform/platform-megadrive/Applications/imshow
 # Statistics from builds
 size.report
 # Build system output
