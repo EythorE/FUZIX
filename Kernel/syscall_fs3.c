@@ -176,11 +176,13 @@ arg_t _open(void)
 	return (uindex);
 
 pdrop:
-	if (parent)
+	if (parent) {
 		i_deref(parent);
+	}
 ideref:
-	if (ino)
+	if (ino) {
 		i_deref(ino);
+	}
 idrop:
 	i_unlock(ino);
 	/* Falls through and drops the reference count */

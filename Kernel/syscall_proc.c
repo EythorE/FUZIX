@@ -411,6 +411,10 @@ arg_t _fork(void)
 	if (!new_process)
 		return -1;
 
+	kprintf("_fork: pid=%d cwd=%p(ino=%d) root=%p(ino=%d)\n",
+		udata.u_ptab->p_pid,
+		udata.u_cwd, udata.u_cwd ? udata.u_cwd->c_num : -1,
+		udata.u_root, udata.u_root ? udata.u_root->c_num : -1);
 	irq = di();
 	/*
 	 * We're going to run our child process next, so mark this process as

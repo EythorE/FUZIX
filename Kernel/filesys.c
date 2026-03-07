@@ -173,8 +173,9 @@ inoptr n_open(uint8_t *namep, inoptr *parent)
        do directory manipulation */
     if(parent)
         *parent = wd;
-    else
+    else {
         i_deref(wd);
+    }
     /* Check if we failed */
     if(!(parent || ninode))
         udata.u_error = ENOENT;
@@ -857,8 +858,15 @@ void i_deref(register inoptr ino)
 
     magic(ino);
 
-    if(!ino->c_refs)
+    if(ino->c_num == 44)
+        kprintf("D44: %d->%d\n",
+                ino->c_refs, ino->c_refs-1);
+    if(!ino->c_refs) {
+        kprintf("PANIC num=%d cwd=%d root=%d\n", ino->c_num,
+                udata.u_cwd ? udata.u_cwd->c_num : -1,
+                udata.u_root ? udata.u_root->c_num : -1);
         panic(PANIC_INODE_FREED);
+    }
 
     if (mode == MODE_R(F_PIPE))
         wakeup((uint8_t *)ino);

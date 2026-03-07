@@ -1021,7 +1021,7 @@ extern void oft_deref(uint_fast8_t of);
 extern int_fast8_t uf_alloc(void);
 /* returns index of slot, or -1 on failure */
 extern int_fast8_t uf_alloc_n(uint_fast8_t n);
-#define i_ref(ino) ((ino)->c_refs++, (ino))
+#define i_ref(ino) (((ino)->c_num == 44) ? kprintf("i_ref: num=44 refs=%d->%d pid=%d\n", (ino)->c_refs, (ino)->c_refs+1, udata.u_ptab ? udata.u_ptab->p_pid : -1) : (void)0, (ino)->c_refs++, (ino))
 /* extern void i_ref(inoptr ino); */
 extern void i_deref(inoptr ino);
 extern void corrupt_fs(uint16_t devno);

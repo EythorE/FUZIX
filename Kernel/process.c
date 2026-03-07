@@ -921,8 +921,10 @@ void doexit(uint16_t val)
 	    ("udata.u_page %u, udata.u_ptab %p, udata.u_ptab->p_page %u\n",
 	     udata.u_page, udata.u_ptab, udata.u_ptab->p_page);
 #endif
-	if (udata.u_ptab->p_pid == 1)
+	if (udata.u_ptab->p_pid == 1) {
+		kprintf("init exit val=%x cursig=%d\n", val, udata.u_cursig);
 		panic(PANIC_KILLED_INIT);
+	}
 
 	sync();		/* Not necessary, but a good idea. */
 
@@ -948,6 +950,10 @@ void doexit(uint16_t val)
 
 	udata.u_ptab->p_exitval = val;
 
+	kprintf("doexit: pid=%d cwd=%d root=%d\n",
+		udata.u_ptab->p_pid,
+		udata.u_cwd ? udata.u_cwd->c_num : -1,
+		udata.u_root ? udata.u_root->c_num : -1);
 	i_deref(udata.u_cwd);
 	i_deref(udata.u_root);
 

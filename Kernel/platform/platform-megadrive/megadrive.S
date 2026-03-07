@@ -64,6 +64,10 @@ INT_HInterrupt:
 
 # Vertical interrupt - run once per frame Pal 50hz, NTSC 60hz
 INT_VInterrupt:
+	; TEST: disabled entirely to isolate inode freed panic
+	rte
+
+INT_VInterrupt_disabled:
 ;interrupt: I need to understand what is going on here;
 	; C will save and restore a2+/d2+
 	movem.l a0-a1/a5/d0-d1,-(sp)
@@ -71,7 +75,7 @@ INT_VInterrupt:
 	move.l udata_shadow,a5	; set up the register global
 	move.b #1,U_DATA__U_ININTERRUPT(a5)
 	jsr timer_interrupt
-	jsr tty_interrupt 
+	jsr tty_interrupt
 	clr.b U_DATA__U_ININTERRUPT(a5)
 
 	tst.b U_DATA__U_INSYS(a5)
