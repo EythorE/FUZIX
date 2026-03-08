@@ -183,32 +183,115 @@ every 8-bit micro.)
 
 ### Filesystem
 
-Use a simple Unix-like filesystem. Options:
+#### What GNU tools actually require from the filesystem
 
-**Option A: Write our own (minifs)**
-- Superblock → inode table → data blocks
-- Fixed-size inodes (64 bytes), direct block pointers only
-- Max file size: 12 direct × 512B = 6KB, or add single-indirect for ~70KB
-- Simple, readable, fits in 500 lines of C
-- We write our own `mkfs` and `fsck` (trivial for a simple fs)
+| Requirement | Why | Who needs it |
+|-------------|-----|-------------|
+| `stat()` with `st_mtime` | Rebuild decisions (is .o newer than .c?) | `make` |
+| Temp files: create, write, close, reopen, unlink | Compiler pipeline (cpp→cc1→as→ld communicates via temp files) | GCC |
+| Unlink-while-open (deferred delete) | GCC unlinks temp files while child still reads them; data must survive until last fd closes | GCC |
+| Atomic `rename()` | Editors/compilers write to temp then rename over target to prevent half-written files | GCC, editors, `install` |
+| `lseek()` on files | Random access into object files and archives | `ld`, `ar`, `objcopy` |
+| Hierarchical directories with `.` and `..` | Path resolution, `cd ..`, relative paths | Everything |
+| Directory listing (`opendir`/`readdir`) | `ls`, `find`, `make` pattern rules, shell globbing | Everything |
 
-**Option B: Use FAT16**
-- Well-understood, tools everywhere
-- No hard links, no Unix metadata (but we don't need it)
-- Slightly more code but zero filesystem tool development
+#### What we do NOT need
 
-**Option C: Use FUZIX's filesystem format**
-- We already have `mkfs`, `ucp`, `fsck` from FUZIX's `Standalone/` tools
-- It works, we've used it
-- Ties us to FUZIX somewhat
+- **Permissions / mode bits** — single user, everything is rwx
+- **Owner / group (uid/gid)** — single user
+- **Symbolic links** — nice to have, not required by any core tool
+- **Multiple filesystem types / mount** — one fs is enough
+- **File locking** — advisory anyway, nothing enforces it
+- **Sparse files, extended attributes, ACLs** — no
 
-**Recommendation: Option A (minifs)** for the learning value and simplicity, with
-Option C as fallback if time is short. The filesystem is one of the most
-educational parts of an OS to write.
+#### Options evaluated
 
-For the Mega Drive, the filesystem lives on:
-- ROM (read-only, baked into the cartridge) — boot filesystem
-- SRAM at 0x200000 (read-write, battery-backed) — user filesystem
+**Option A: Write our own (minifs)** — RECOMMENDED
+- Superblock → inode table → data blocks, classic Unix layout
+- We control every line, easy to debug, educational
+- ~500 lines of C for the kernel side, ~200 for host-side `mkfs`/`fsck`
+- See on-disk format below
+
+**Option B: FAT16** — REJECTED
+- No `mtime` with second-level precision (FAT timestamps are 2-second granularity)
+- No deferred delete (unlink-while-open) — FAT has no inode concept, directory
+  entry IS the file metadata. Unlinking means removing the dir entry, which
+  breaks any open fd.
+- No atomic `rename()` across directories without inode indirection
+- These are not obscure features — GCC and make depend on them daily.
+
+**Option C: FUZIX filesystem format** — FALLBACK
+- We have working `mkfs`, `ucp`, `fsck` from `Standalone/`
+- But: it has permissions, uid/gid, and complexity we don't need
+- And: tying our new OS to FUZIX's format defeats the point of starting fresh
+
+#### minifs on-disk format
+
+```
+Block 0:        Superblock
+Block 1..N:     Inode table (fixed-size inodes)
+Block N+1..:    Data blocks
+
+Block size: 1024 bytes (good balance for our RAM constraints)
+```
+
+**Superblock (1024 bytes, block 0):**
+```c
+struct superblock {
+    uint32_t magic;          // 0x4D494E49 ("MINI")
+    uint16_t block_size;     // 1024
+    uint16_t nblocks;        // total blocks in filesystem
+    uint16_t ninodes;        // total inodes
+    uint16_t free_list;      // head of free block linked list
+    uint16_t free_inodes;    // count of free inodes
+    uint32_t mtime;          // last mount time
+};
+```
+
+**Inode (64 bytes):**
+```c
+struct inode {
+    uint8_t  type;           // 0=free, 1=file, 2=dir, 3=device
+    uint8_t  nlink;          // hard link count (usually 1)
+    uint32_t size;           // file size in bytes
+    uint32_t mtime;          // modification time (seconds since epoch)
+    uint16_t direct[12];     // 12 direct block pointers → 12KB
+    uint16_t indirect;       // single indirect → +512 blocks → 524KB
+    uint8_t  pad[14];        // reserved (future: double indirect, ctime)
+};
+// With 1KB blocks: max file size = 12KB + 512KB = 524KB
+// That's enough for any reasonable object file or binary on this platform.
+// The entire Mega Drive RAM disk is 1.5MB.
+```
+
+**Directory entry (32 bytes):**
+```c
+struct dirent {
+    uint16_t inode;          // inode number (0 = deleted entry)
+    char     name[30];       // null-terminated filename
+};
+// 32 entries per 1KB block. 30-char names (classic Unix was 14).
+```
+
+**Free block list:** Each free block starts with a `uint16_t` pointing to the
+next free block (0 = end of list). Simple, no bitmap needed.
+
+#### Key filesystem operations
+
+| Operation | Implementation |
+|-----------|---------------|
+| `open(path)` | Walk directories resolving each component, return inode |
+| `read(fd, buf, n)` | Map file offset to block via direct/indirect pointers, copy data |
+| `write(fd, buf, n)` | Allocate blocks as needed from free list, update inode size and mtime |
+| `unlink(path)` | Remove directory entry, decrement nlink. If nlink==0 AND no open fds, free inode+blocks. If fds still open, defer. |
+| `rename(old, new)` | Add new dir entry pointing to same inode, remove old entry. Atomic because it's one inode. |
+| `mkdir(path)` | Allocate inode (type=dir), create `.` and `..` entries |
+| `stat(path)` | Return inode metadata (type, size, mtime) |
+
+#### Storage on Mega Drive
+
+- **ROM** (read-only, baked into cartridge) — boot filesystem with kernel, shell, core utils
+- **SRAM at 0x200000** (read-write, battery-backed) — user filesystem for development, compiler output, etc.
 
 ### Device Model
 
